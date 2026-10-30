@@ -1,0 +1,11 @@
+{
+  "targets": [
+    {
+      "target": "172.16.243.135",
+      "scan_mode": "quick",
+      "status": "success",
+      "source": "gui",
+      "last_used": "2026-10-30T19:18:17.021370+00:00"
+    }
+  ]
+}

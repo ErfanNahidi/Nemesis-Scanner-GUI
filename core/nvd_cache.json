@@ -1,0 +1,88 @@
+{
+  "nvd:svrloc": [],
+  "nvd:https": [
+    {
+      "cve": "CVE-1999-1537",
+      "description": "IIS 3.x and 4.x does not distinguish between pages requiring encryption and those that do not, which allows remote attackers to cause a denial of service (resource exhaustion) via SSL requests to the ",
+      "cvss_score": 5.0,
+      "severity": "MEDIUM",
+      "exploit_available": false,
+      "exploitdb_url": "https://www.exploit-db.com/search?cve=CVE-1999-1537"
+    },
+    {
+      "cve": "CVE-2000-0539",
+      "description": "Servlet examples in Allaire JRun 2.3.x allow remote attackers to obtain sensitive information, e.g. listing HttpSession ID's via the SessionServlet servlet.",
+      "cvss_score": 6.4,
+      "severity": "MEDIUM",
+      "exploit_available": false,
+      "exploitdb_url": "https://www.exploit-db.com/search?cve=CVE-2000-0539"
+    },
+    {
+      "cve": "CVE-2000-0739",
+      "description": "Directory traversal vulnerability in strong.exe program in NAI Net Tools PKI server 1.0 before HotFix 3 allows remote attackers to read arbitrary files via a .. (dot dot) attack in an HTTPS request to",
+      "cvss_score": 5.0,
+      "severity": "MEDIUM",
+      "exploit_available": true,
+      "exploitdb_url": "https://www.exploit-db.com/search?cve=CVE-2000-0739"
+    },
+    {
+      "cve": "CVE-2000-0740",
+      "description": "Buffer overflow in strong.exe program in NAI Net Tools PKI server 1.0 before HotFix 3 allows remote attackers to execute arbitrary commands via a long URL in the HTTPS port.",
+      "cvss_score": 5.0,
+      "severity": "MEDIUM",
+      "exploit_available": true,
+      "exploitdb_url": "https://www.exploit-db.com/search?cve=CVE-2000-0740"
+    },
+    {
+      "cve": "CVE-2000-0791",
+      "description": "Trustix installs the httpsd program for Apache-SSL with world-writeable permissions, which allows local users to replace it with a Trojan horse.",
+      "cvss_score": 4.6,
+      "severity": "MEDIUM",
+      "exploit_available": false,
+      "exploitdb_url": "https://www.exploit-db.com/search?cve=CVE-2000-0791"
+    },
+    {
+      "cve": "CVE-2001-0606",
+      "description": "Vulnerability in iPlanet Web Server 4.X in HP-UX 11.04 (VVOS) with VirtualVault A.04.00 allows a remote attacker to create a denial of service via the HTTPS service.",
+      "cvss_score": 5.0,
+      "severity": "MEDIUM",
+      "exploit_available": false,
+      "exploitdb_url": "https://www.exploit-db.com/search?cve=CVE-2001-0606"
+    },
+    {
+      "cve": "CVE-2001-0761",
+      "description": "Buffer overflow in HttpSave.dll in Trend Micro InterScan WebManager 1.2 allows remote attackers to execute arbitrary code via a long value to a certain parameter.",
+      "cvss_score": 7.5,
+      "severity": "HIGH",
+      "exploit_available": false,
+      "exploitdb_url": "https://www.exploit-db.com/search?cve=CVE-2001-0761"
+    },
+    {
+      "cve": "CVE-2001-1574",
+      "description": "Buffer overflow in (1) HttpSaveCVP.dll and (2) HttpSaveCSP.dll in Trend Micro InterScan VirusWall 3.5.1 allows remote attackers to execute arbitrary code.",
+      "cvss_score": 10.0,
+      "severity": "HIGH",
+      "exploit_available": false,
+      "exploitdb_url": "https://www.exploit-db.com/search?cve=CVE-2001-1574"
+    },
+    {
+      "cve": "CVE-2002-0778",
+      "description": "The default configuration of the proxy for Cisco Cache Engine and Content Engine allows remote attackers to use HTTPS to make TCP connections to allowed IP addresses while hiding the actual source IP.",
+      "cvss_score": 7.5,
+      "severity": "HIGH",
+      "exploit_available": false,
+      "exploitdb_url": "https://www.exploit-db.com/search?cve=CVE-2002-0778"
+    },
+    {
+      "cve": "CVE-2002-0792",
+      "description": "The web management interface for Cisco Content Service Switch (CSS) 11000 switches allows remote attackers to cause a denial of service (soft reset) via (1) an HTTPS POST request, or (2) malformed XML",
+      "cvss_score": 5.0,
+      "severity": "MEDIUM",
+      "exploit_available": false,
+      "exploitdb_url": "https://www.exploit-db.com/search?cve=CVE-2002-0792"
+    }
+  ],
+  "nvd:OpenSSH 8.6 ssh": [],
+  "nvd:VMware ESXi Server httpd http": [],
+  "nvd:VMware Authentication Daemon 1.10 vmware-auth": []
+}
