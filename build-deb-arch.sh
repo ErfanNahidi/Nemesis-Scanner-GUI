@@ -13,7 +13,7 @@ copy_app() {
   local root="$1"
   mkdir -p "$root/usr/share/nemesis-scanner-gui" \
     "$root/usr/share/applications" "$root/usr/share/icons/hicolor/256x256/apps" "$root/usr/bin"
-  cp -a main.py core nemesis_gui Logo.png "$root/usr/share/nemesis-scanner-gui/"
+  cp -a main.py core nemesis_gui Logo-small.png "$root/usr/share/nemesis-scanner-gui/"
   local nmap_python_dir
   nmap_python_dir="$(python3 -c 'import nmap; from pathlib import Path; print(Path(nmap.__file__).parent)')"
   cp -a "$nmap_python_dir" "$root/usr/share/nemesis-scanner-gui/nmap"
@@ -50,7 +50,7 @@ Section: utils
 Priority: optional
 Architecture: all
 Maintainer: Nemesis Scanner contributors
-Depends: python3, python3-tk, python3-requests, python3-pil, nmap
+Depends: python3, python3-tk, python3-requests, nmap
 Description: Nemesis Scanner graphical desktop application
  Network scanner GUI with local reports and vulnerability review.
 EOF
@@ -72,7 +72,6 @@ arch = any
 license = unknown
 depend = python
 depend = python-requests
-depend = python-pillow
 depend = tk
 depend = nmap
 EOF
@@ -83,7 +82,7 @@ tar --zstd --format=gnu --owner=0 --group=0 --numeric-owner -C "$ARCH" \
 SRCROOT="$OUT/arch-src"
 rm -rf "$SRCROOT"
 mkdir -p "$SRCROOT/nemesis-scanner-gui-$VERSION"
-tar --exclude='*/__pycache__' --exclude='*.pyc' -cf - main.py core nemesis_gui Logo.png README.md README-fa.md MANUAL.md | \
+tar --exclude='*/__pycache__' --exclude='*.pyc' -cf - main.py core nemesis_gui Logo.png Logo-small.png README.md README-fa.md MANUAL.md | \
   tar -xf - -C "$SRCROOT/nemesis-scanner-gui-$VERSION"
 NMAP_PYTHON_DIR="$(python3 -c 'import nmap; from pathlib import Path; print(Path(nmap.__file__).parent)')"
 cp -a "$NMAP_PYTHON_DIR" "$SRCROOT/nemesis-scanner-gui-$VERSION/nmap"
@@ -98,7 +97,7 @@ pkgrel=1
 pkgdesc='Nemesis Scanner graphical desktop application'
 arch=('any')
 license=('unknown')
-depends=('python' 'python-requests' 'python-pillow' 'tk' 'nmap')
+depends=('python' 'python-requests' 'tk' 'nmap')
 source=("\$pkgname-\$pkgver.tar.gz")
 sha256sums=('$SUM')
 
@@ -106,7 +105,7 @@ package() {
   cd "\$srcdir/\$pkgname-\$pkgver"
   install -d "\$pkgdir/usr/share/nemesis-scanner-gui" "\$pkgdir/usr/bin" \\
     "\$pkgdir/usr/share/applications" "\$pkgdir/usr/share/icons/hicolor/256x256/apps"
-  cp -a main.py core nemesis_gui nmap Logo.png README.md README-fa.md MANUAL.md "\$pkgdir/usr/share/nemesis-scanner-gui/"
+  cp -a main.py core nemesis_gui nmap Logo-small.png README.md README-fa.md MANUAL.md "\$pkgdir/usr/share/nemesis-scanner-gui/"
   cat > "\$pkgdir/usr/bin/nemesis-scanner-gui" <<'LAUNCHER'
 #!/usr/bin/env sh
 cd /usr/share/nemesis-scanner-gui

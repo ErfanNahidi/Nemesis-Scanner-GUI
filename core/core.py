@@ -8,14 +8,18 @@
 import logging
 import asyncio
 import concurrent.futures
+import contextlib
 import os
 import platform
 import shlex
 import shutil
+import signal
 import socket
 import ssl
+import subprocess
 import tempfile
 import threading
+from pathlib import Path
 from typing import Dict, List, Optional, Any
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -34,6 +38,10 @@ from .vulnerability import (
 VERSION = "4.1.0"
 
 _PKEXEC_SCAN_LOCK = threading.Lock()
+
+
+class ScanCancelled(Exception):
+    """Raised when a user cancels an active scan."""
 
 EXPLOITDB_SEARCH = "https://www.exploit-db.com/search?cve="
 
@@ -57,9 +65,9 @@ MODULE_PORTS = {
 }
 
 # Port lists
-QUICK_TCP = [21,22,23,25,53,80,88,110,111,135,139,143,389,443,445,464,587,593,636,
+QUICK_TCP = [21,22,23,25,53,80,88,110,111,135,139,143,389,443,445,464,515,587,593,631,636,
              993,995,1433,1723,3268,3269,3306,3389,5432,5900,5985,5986,8080,8443,8530,8531,
-             9090,10000]
+             9090,9100,10000]
 QUICK_UDP = [53,161,162,67,68,123,520,1900,11211]   # now from constant
 FULL_TCP_RANGE = (1, 65535)
 FULL_UDP_PORTS = [53,67,68,69,123,135,137,138,139,161,162,445,500,514,520,1194,1900,4500,5353,11211]
@@ -116,12 +124,12 @@ def check_http_security_headers(host: str, port: int, use_ssl: bool = False, tim
             s = socket.create_connection((host, port), timeout=timeout)
         s.settimeout(timeout)
         s.sendall(f"GET / HTTP/1.0\r\nHost: {host}\r\nConnection: close\r\n\r\n".encode())
-        data = b""
-        while True:
-            chunk = s.recv(4096)
+        data = bytearray()
+        while b"\r\n\r\n" not in data and len(data) < 65536:
+            chunk = s.recv(min(4096, 65536 - len(data)))
             if not chunk:
                 break
-            data += chunk
+            data.extend(chunk)
         s.close()
         headers_str = data.split(b"\r\n\r\n")[0].decode(errors="ignore") if b"\r\n\r\n" in data else ""
         headers = {}
@@ -261,6 +269,7 @@ class NemesisScanner:
         vuln_source: str = "offline",
         cve_lookup: Optional[bool] = None,
         elevate_nmap: bool = False,
+        cancel_event=None,
     ):
         self.target = target
         self.threads = threads
@@ -284,6 +293,9 @@ class NemesisScanner:
         self.skip_ping = skip_ping
         self.ipv6 = ipv6
         self.elevate_nmap = bool(elevate_nmap)
+        self.cancel_event = cancel_event or threading.Event()
+        self._process_lock = threading.Lock()
+        self._nmap_process = None
 
         # Turbo mode overrides scan_mode and forces insane speed
         self.turbo = turbo
@@ -298,41 +310,151 @@ class NemesisScanner:
         self._target_ip = None  # will be resolved
         self._deep_check_cache = {}
         self._cve_cache = {}
+        self._lookup_semaphore = None
+        self._deep_check_semaphore = None
 
     def _run_nmap(self, arguments: str):
-        """Run Nmap normally, or through a graphical polkit prompt when requested."""
-        if not self.elevate_nmap:
-            return self.nm.scan(self.target, arguments=arguments)
-        if platform.system() != "Linux":
-            raise RuntimeError("Graphical administrator authorization is supported on Linux only.")
-        pkexec = shutil.which("pkexec")
-        if not pkexec:
-            raise RuntimeError(
-                "pkexec was not found. Install the polkit package for your Linux desktop, then try again."
-            )
+        """Run Nmap with cancellable process control, optionally authorizing via polkit."""
+        self._check_cancelled()
+        nmap_path = self.nm._nmap_path
+        nmap_args = [nmap_path, "-oX", "-"] + shlex.split(self.target) + shlex.split(arguments)
+        elevated = self.elevate_nmap
+        helper_context = contextlib.nullcontext(None)
+        cancel_marker = None
 
-        # python-nmap supports sudo=True but hardcodes the terminal-oriented `sudo` command.
-        # Provide a private, temporary sudo shim that delegates only that invocation to pkexec.
-        # The GUI itself remains an unprivileged process and user files stay owned by the user.
-        with _PKEXEC_SCAN_LOCK, tempfile.TemporaryDirectory(prefix="nemesis-pkexec-") as helper_dir:
-            helper = os.path.join(helper_dir, "sudo")
-            nmap_path = self.nm._nmap_path
-            with open(helper, "w", encoding="utf-8") as script:
-                quoted_nmap = shlex.quote(nmap_path)
-                quoted_pkexec = shlex.quote(pkexec)
-                script.write(
-                    "#!/bin/sh\n"
-                    f"[ \"$1\" = {quoted_nmap} ] || exit 126\n"
-                    "shift\n"
-                    f"exec {quoted_pkexec} {quoted_nmap} \"$@\"\n"
+        if elevated:
+            if platform.system() != "Linux":
+                raise RuntimeError("Graphical administrator authorization is supported on Linux only.")
+            pkexec = shutil.which("pkexec")
+            if not pkexec:
+                raise RuntimeError(
+                    "pkexec was not found. Install the polkit package for your Linux desktop, then try again."
                 )
-            os.chmod(helper, 0o700)
-            old_path = os.environ.get("PATH", "")
+            _PKEXEC_SCAN_LOCK.acquire()
+            helper_context = tempfile.TemporaryDirectory(prefix="nemesis-pkexec-")
+
+        try:
+            with helper_context as helper_dir:
+                if elevated:
+                    cancel_marker = os.path.join(helper_dir, "cancel-scan")
+                    helper = os.path.join(helper_dir, "run-nmap")
+                    quoted_nmap = shlex.quote(nmap_path)
+                    quoted_marker = shlex.quote(cancel_marker)
+                    # Use a POSIX-safe helper: run only the resolved Nmap binary and let its
+                    # privileged parent monitor a private cancellation marker.
+                    with open(helper, "w", encoding="utf-8") as script:
+                        script.write(
+                            "#!/bin/sh\n"
+                            f"[ \"$1\" = {quoted_nmap} ] || exit 126\n"
+                            f"[ \"$2\" = {quoted_marker} ] || exit 126\n"
+                            "nmap=$1; cancel=$2; shift 2\n"
+                            "\"$nmap\" \"$@\" & child=$!\n"
+                            "( while kill -0 \"$child\" 2>/dev/null; do\n"
+                            "    if [ -e \"$cancel\" ]; then\n"
+                            "      kill -TERM \"$child\" 2>/dev/null\n"
+                            "      sleep 2\n"
+                            "      kill -KILL \"$child\" 2>/dev/null\n"
+                            "      exit\n"
+                            "    fi\n"
+                            "    sleep 0.2\n"
+                            "  done ) & watcher=$!\n"
+                            "wait \"$child\"; result=$?\n"
+                            "kill \"$watcher\" 2>/dev/null; wait \"$watcher\" 2>/dev/null\n"
+                            "exit \"$result\"\n"
+                        )
+                    os.chmod(helper, 0o700)
+                    command = [pkexec, helper, nmap_path, cancel_marker, *nmap_args[1:]]
+                else:
+                    command = nmap_args
+
+                creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0
+                process = subprocess.Popen(
+                    command,
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    start_new_session=(os.name != "nt"),
+                    creationflags=creationflags,
+                )
+                with self._process_lock:
+                    self._nmap_process = process
+
+                output = {"stdout": bytearray(), "stderr": bytearray()}
+                readers = [
+                    threading.Thread(target=self._drain_pipe, args=(process.stdout, output["stdout"]), daemon=True),
+                    threading.Thread(target=self._drain_pipe, args=(process.stderr, output["stderr"]), daemon=True),
+                ]
+                for reader in readers:
+                    reader.start()
+
+                try:
+                    while process.poll() is None:
+                        if self.cancel_event.wait(0.1):
+                            if elevated and cancel_marker:
+                                Path(cancel_marker).touch()
+                            else:
+                                self._terminate_process(process)
+                            try:
+                                process.wait(timeout=4)
+                            except subprocess.TimeoutExpired:
+                                self._terminate_process(process, force=True)
+                                process.wait()
+                            raise ScanCancelled("Scan cancelled by user.")
+                    for reader in readers:
+                        reader.join()
+                finally:
+                    with self._process_lock:
+                        if self._nmap_process is process:
+                            self._nmap_process = None
+
+                if self.cancel_event.is_set():
+                    raise ScanCancelled("Scan cancelled by user.")
+                stderr = output["stderr"].decode(errors="replace")
+                warnings, errors = [], []
+                for line in stderr.split(os.linesep):
+                    if not line:
+                        continue
+                    if line.lower().startswith("warning: "):
+                        warnings.append(line + os.linesep)
+                    else:
+                        errors.append(line + os.linesep)
+                return self.nm.analyse_nmap_xml_scan(
+                    nmap_xml_output=bytes(output["stdout"]),
+                    nmap_err=stderr,
+                    nmap_err_keep_trace=errors,
+                    nmap_warn_keep_trace=warnings,
+                )
+        finally:
+            if elevated:
+                _PKEXEC_SCAN_LOCK.release()
+
+    @staticmethod
+    def _drain_pipe(stream, destination):
+        while True:
+            chunk = stream.read(65536)
+            if not chunk:
+                break
+            destination.extend(chunk)
+
+    @staticmethod
+    def _terminate_process(process, force=False):
+        try:
+            if os.name == "nt":
+                process.kill() if force else process.terminate()
+            else:
+                os.killpg(process.pid, signal.SIGKILL if force else signal.SIGTERM)
+        except (OSError, ProcessLookupError):
             try:
-                os.environ["PATH"] = helper_dir + os.pathsep + old_path
-                return self.nm.scan(self.target, arguments=arguments, sudo=True)
-            finally:
-                os.environ["PATH"] = old_path
+                process.kill() if force else process.terminate()
+            except OSError:
+                pass
+
+    def cancel_scan(self):
+        self.cancel_event.set()
+
+    def _check_cancelled(self):
+        if self.cancel_event.is_set():
+            raise ScanCancelled("Scan cancelled by user.")
 
     def _resolve_target(self) -> str:
         """Resolve target to IP; for IPv6 we rely on nmap -6."""
@@ -362,7 +484,7 @@ class NemesisScanner:
             return f"T:{','.join(map(str,tcp))},U:{','.join(map(str,udp))}"
         elif self.scan_mode == "common":
             udp = FULL_UDP_PORTS
-            return f"T:1-1000,U:{','.join(map(str,udp))}"
+            return f"T:1-1000,9100,U:{','.join(map(str,udp))}"
         elif self.scan_mode == "full":
             udp = FULL_UDP_PORTS
             return f"T:1-65535,U:{','.join(map(str,udp))}"
@@ -429,7 +551,9 @@ class NemesisScanner:
             if self.scan_mode == "quick":
                 args.append("-T5 --min-rate 2500 --host-timeout 45s")
             else:
-                args.append("-T4 --min-rate 800 --host-timeout 8m")
+                # Keep T4's adaptive retry and congestion behavior, but avoid the
+                # unnecessarily low packet floor that made broad scans crawl.
+                args.append("-T4 --min-rate 1500 --host-timeout 8m")
 
         # Evasion & advanced options
         if self.fragment:
@@ -449,6 +573,7 @@ class NemesisScanner:
         return " ".join(args)
 
     async def run_scan_async(self):
+        self._check_cancelled()
         loop = asyncio.get_running_loop()
         nmap_args = self._nmap_arguments()
         logger.info(f"Scanning {self.target} with args: {nmap_args}")
@@ -458,14 +583,15 @@ class NemesisScanner:
                 lambda: self._run_nmap(nmap_args)
             )
 
-        # Fallback for the false-empty result pattern: if a script-heavy quick scan finds host up
-        # but no TCP services, retry with a safer port set and without aggressive NSE wildcard
-        # script filters. This preserves the feature while avoiding misleading "No open services"
-        # results on valid hosts.
+        # Retry only when NSE vulnerability scripts were enabled and the result is completely
+        # empty. A normal no-results scan is valid; repeating it with a one-minute timeout only
+        # makes filtered hosts appear stalled.
         if self.target in self.nm.all_hosts():
+            self._check_cancelled()
             host_data = self.nm[self.target]
             tcp_data = host_data.get("tcp", {})
-            if not tcp_data and self.scan_mode in ("quick", "common"):
+            udp_data = host_data.get("udp", {})
+            if self.vuln_check and not tcp_data and not udp_data and self.scan_mode in ("quick", "common"):
                 fallback_args = (
                     "-Pn -sT -p 1-1000 -T4 --max-retries 1 --host-timeout 1m"
                 )
@@ -534,6 +660,7 @@ class NemesisScanner:
         )
 
     async def _correlate_cves(self, service: Dict) -> List[Dict]:
+        self._check_cancelled()
         cache_key = self._service_cache_key(service)
         if cache_key in self._cve_cache:
             return self._cve_cache[cache_key]
@@ -546,40 +673,45 @@ class NemesisScanner:
         if self.cve_lookup:
             # Online NVD lookup is independent of running intrusive Nmap NSE scripts.
             loop = asyncio.get_running_loop()
-            live_cves = await loop.run_in_executor(
-                None,
-                lookup_nvd_vulnerabilities,
-                service["name"],
-                service.get("product", ""),
-                service.get("version", ""),
-                self.nvd_api_key,
-                self.vuln_source == "online",
-            )
+            async with self._lookup_semaphore:
+                live_cves = await loop.run_in_executor(
+                    None,
+                    lookup_nvd_vulnerabilities,
+                    service["name"],
+                    service.get("product", ""),
+                    service.get("version", ""),
+                    self.nvd_api_key,
+                    self.vuln_source == "online",
+                )
+            self._check_cancelled()
             for lcve in live_cves:
                 if not any(c["cve"] == lcve["cve"] for c in cves if c["cve"]):
                     cves.append(lcve)
 
         # Enrich with Vulners exploits
-        for cve_entry in cves:
-            if (
-                self.vuln_source == "online"
-                and cve_entry.get("cve")
-                and self.vulners_api_key
-            ):
-                exploits = await asyncio.get_running_loop().run_in_executor(
-                    None,
-                    search_exploits_vulners,
-                    cve_entry["cve"],
-                    self.vulners_api_key,
+        exploit_entries = [
+            entry for entry in cves
+            if self.vuln_source == "online" and entry.get("cve") and self.vulners_api_key
+        ]
+
+        async def lookup_exploits(entry):
+            async with self._lookup_semaphore:
+                return await asyncio.get_running_loop().run_in_executor(
+                    None, search_exploits_vulners, entry["cve"], self.vulners_api_key
                 )
-                cve_entry["exploits"] = [{
-                    "title": e.get("title", ""),
-                    "url": e.get("href", ""),
-                    "type": e.get("type", ""),
-                } for e in exploits]
-                if exploits:
-                    cve_entry["exploit_available"] = True
-            # Ensure exploitdb_url
+
+        exploit_results = await asyncio.gather(*(lookup_exploits(entry) for entry in exploit_entries))
+        for cve_entry, exploits in zip(exploit_entries, exploit_results):
+            self._check_cancelled()
+            cve_entry["exploits"] = [{
+                "title": e.get("title", ""),
+                "url": e.get("href", ""),
+                "type": e.get("type", ""),
+            } for e in exploits]
+            if exploits:
+                cve_entry["exploit_available"] = True
+
+        for cve_entry in cves:
             if "exploitdb_url" not in cve_entry:
                 cve_entry["exploitdb_url"] = get_exploitdb_links(cve_entry.get("cve", ""))
 
@@ -600,13 +732,24 @@ class NemesisScanner:
         return cves
 
     async def _correlate_service(self, service: Dict):
+        self._check_cancelled()
         key = f"{service['proto']}/{service['port']} {service['name']} {service['product']} {service['version']}".strip()
-        vulns = await self._correlate_cves(service)
-
+        tasks = [self._correlate_cves(service)]
+        deep_check_key = self._service_cache_key(service)
+        should_deep_check = self.deep_inspect and self._target_ip and deep_check_key not in self._deep_check_cache
+        if should_deep_check:
+            async def inspect_service():
+                async with self._deep_check_semaphore:
+                    return await asyncio.get_running_loop().run_in_executor(
+                        None, run_deep_checks, self._target_ip, service
+                    )
+            tasks.append(inspect_service())
+        results = await asyncio.gather(*tasks)
+        vulns = results[0]
+        if should_deep_check:
+            self._deep_check_cache[deep_check_key] = results[1]
+        self._check_cancelled()
         if self.deep_inspect and self._target_ip:
-            deep_check_key = self._service_cache_key(service)
-            if deep_check_key not in self._deep_check_cache:
-                self._deep_check_cache[deep_check_key] = run_deep_checks(self._target_ip, service)
             deep_vulns = self._deep_check_cache[deep_check_key]
             if deep_vulns:
                 for dv in deep_vulns:
@@ -617,11 +760,15 @@ class NemesisScanner:
         return key, vulns
 
     async def correlate_vulns(self, services: List[Dict]) -> Dict[str, List[Dict]]:
+        self._check_cancelled()
         if not services:
             return {}
 
+        self._lookup_semaphore = asyncio.Semaphore(8)
+        self._deep_check_semaphore = asyncio.Semaphore(8)
         tasks = [self._correlate_service(svc) for svc in services]
         results = await asyncio.gather(*tasks)
+        self._check_cancelled()
 
         vuln_map = {}
         for key, vulns in results:
@@ -641,11 +788,14 @@ class NemesisScanner:
         return modules
 
     async def full_analysis(self):
+        self._check_cancelled()
         await self.run_scan_async()
+        self._check_cancelled()
         if not self.scan_data:
             return None
         services = self.extract_services()
         vulns = await self.correlate_vulns(services)
+        self._check_cancelled()
         modules = self.module_classification(services)
         return {
             "target": self.target,

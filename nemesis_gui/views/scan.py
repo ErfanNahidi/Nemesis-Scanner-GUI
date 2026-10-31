@@ -90,6 +90,9 @@ class ScanPage(ttk.Frame):
         self.status_label.grid(row=0, column=0, sticky="w")
         self.scan_button = ttk.Button(footer, text="Run scan", style="Primary.TButton", command=self._start_scan)
         self.scan_button.grid(row=0, column=1, sticky="e")
+        self.cancel_button = ttk.Button(footer, text="Cancel scan", command=self._cancel_scan)
+        self.cancel_button.grid(row=0, column=2, sticky="e", padx=(8, 0))
+        self.cancel_button.grid_remove()
         self._update_button()
 
         result = ttk.Frame(self, style="Panel.TFrame", padding=12)
@@ -150,8 +153,8 @@ class ScanPage(ttk.Frame):
 
     def _update_profile_hint(self, *_args):
         descriptions = {
-            "Quick": "Common TCP and UDP ports; optimized for short scans.",
-            "Common": "TCP ports 1-1000 and commonly used UDP ports.",
+            "Quick": "Common TCP/UDP and printer ports; optimized for short scans.",
+            "Common": "TCP ports 1-1000, printer port 9100, and common UDP ports.",
             "Full TCP": "All TCP ports and commonly used UDP ports; longer runtime.",
         }
         self.profile_hint.set(descriptions.get(self.profile_var.get(), "Select a port scan profile."))
@@ -197,11 +200,20 @@ class ScanPage(ttk.Frame):
         )
         self.scan_button.configure(state="disabled")
         self.progress.grid()
-        self.progress.start(12)
+        self.progress.start()
+        self.cancel_button.configure(state="normal", text="Cancel scan")
+        self.cancel_button.grid()
         status = "Requesting administrator authorization..." if self.elevate_var.get() else f"Scanning target {target}..."
         self.status_label.configure(text=status, foreground=COLORS["green"])
         self.result_summary.configure(text=f"Data source: {provider}")
         self.worker.start()
+
+    def _cancel_scan(self):
+        if self.worker is None:
+            return
+        self.cancel_button.configure(state="disabled", text="Cancelling…")
+        self.status_label.configure(text="Cancelling scan and stopping Nmap…", foreground=COLORS["gold"])
+        self.worker.cancel()
 
     def _drain_events(self):
         worker = self.worker
@@ -209,10 +221,21 @@ class ScanPage(ttk.Frame):
             while not worker.events.empty():
                 event = worker.events.get()
                 if event[0] == "status":
-                    self.status_label.configure(text=event[1], foreground=COLORS["green"])
+                    if not worker.cancel_event.is_set():
+                        self.status_label.configure(text=event[1], foreground=COLORS["green"])
+                elif event[0] == "cancelled":
+                    self.progress.stop()
+                    self.progress.grid_remove()
+                    self.cancel_button.grid_remove()
+                    self.status_label.configure(text="Scan cancelled. No report was saved.", foreground=COLORS["muted"])
+                    self.result_summary.configure(text="Scan cancelled")
+                    self.worker = None
+                    self._update_button()
+                    break
                 elif event[0] == "error":
                     self.progress.stop()
                     self.progress.grid_remove()
+                    self.cancel_button.grid_remove()
                     self.status_label.configure(text=f"Scan error: {event[1]}", foreground=COLORS["red"])
                     self.result_summary.configure(text="Report not generated")
                     self.worker = None
@@ -222,6 +245,7 @@ class ScanPage(ttk.Frame):
                     _, report, path = event
                     self.progress.stop()
                     self.progress.grid_remove()
+                    self.cancel_button.grid_remove()
                     self._show_report(report)
                     warnings = report.get("provider_warnings", [])
                     if warnings:

@@ -1,10 +1,8 @@
-from io import BytesIO
+import platform
 import shutil
 import tkinter as tk
 from pathlib import Path
 from tkinter import ttk
-
-from PIL import Image
 
 from core.history import RecentTargetStore
 
@@ -20,6 +18,13 @@ class NemesisApp(tk.Tk):
         super().__init__()
         apply_theme(self)
         self.title(f"Nemesis Scanner GUI {__version__}")
+        if platform.system() == "Windows":
+            icon_path = Path(__file__).resolve().parents[1] / "NemesisScanner.ico"
+            if icon_path.is_file():
+                try:
+                    self.iconbitmap(str(icon_path))
+                except tk.TclError:
+                    pass
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
         window_width = min(1440, screen_width - 40)
@@ -42,15 +47,11 @@ class NemesisApp(tk.Tk):
         brand = tk.Frame(sidebar, bg=COLORS["green_dark"])
         brand.pack(fill="x", pady=(0, 40))
         gui_root = Path(__file__).resolve().parents[1]
-        logo_path = next((gui_root / name for name in ("Logo.png", "logo.png") if (gui_root / name).is_file()), None)
+        logo_names = ("Logo-small.png", "logo-small.png", "Logo.png", "logo.png")
+        logo_path = next((gui_root / name for name in logo_names if (gui_root / name).is_file()), None)
         try:
             if logo_path:
-                with Image.open(logo_path) as source_image:
-                    source_image = source_image.convert("RGBA")
-                    source_image.thumbnail((88, 88), Image.Resampling.LANCZOS)
-                    logo_data = BytesIO()
-                    source_image.save(logo_data, format="PNG")
-                    self.logo_image = tk.PhotoImage(data=logo_data.getvalue(), format="png", master=self)
+                self.logo_image = tk.PhotoImage(file=str(logo_path), master=self)
                 tk.Label(brand, image=self.logo_image, bg=COLORS["green_dark"], bd=0).pack(side="left", padx=(0, 12))
             else:
                 raise FileNotFoundError(f"Nemesis logo was not found in {gui_root}")

@@ -1,6 +1,6 @@
 # Nemesis Scanner GUI — User Manual
 
-Version 1.1.0
+Version 1.2.0
 
 This manual covers installation, the three application screens, scan settings, vulnerability data,
 reports, data storage, and common problems. The interface is currently in English.
@@ -12,7 +12,7 @@ open ports and services. The application can then correlate the discovered servi
 with a bundled local vulnerability database or online providers. Completed scans are saved as
 JSON reports and can be reviewed or exported later.
 
-The GUI release number (1.1.0) is independent of the scanner engine version. The GUI is not a
+The GUI release number (1.2.0) is independent of the scanner engine version. The GUI is not a
 general-purpose vulnerability scanner and a reported match is not proof that a host is
 exploitable. Verify findings against the affected system and the cited vendor advisories.
 
@@ -33,11 +33,11 @@ for production systems and follow the owner's change-control requirements.
 ### Linux packages
 
 - **DEB:** Debian/Ubuntu systems. Installing the package with the graphical package installer or
-  `apt` resolves its declared Python, Tkinter, requests, Pillow, and Nmap dependencies.
+  `apt` resolves its declared Python, Tkinter, requests, and Nmap dependencies.
 - **RPM:** Fedora-compatible x86_64 systems. The RPM includes the Python application runtime and
   libraries, while RPM resolves native library requirements and installs Nmap.
 - **Arch:** install the `.pkg.tar.zst` with `pacman -U`; pacman installs the declared Python,
-  Tkinter, requests, Pillow, and Nmap dependencies. The small `python-nmap` adapter is included in
+  Tkinter, requests, and Nmap dependencies. The small `python-nmap` adapter is included in
   the application package.
 - **AppImage:** requires an x86_64 Linux system with compatible native desktop libraries. Nmap is
   not included and must be installed separately.
@@ -47,8 +47,8 @@ AppImage are not intended for older Linux releases whose system libraries are in
 
 ### Windows
 
-The Windows EXE bundles Python and the application's Python libraries. Install Nmap for Windows
-before scanning. Nmap's packet-capture driver (Npcap) may be required for certain scan types; use
+The Windows EXE bundles Python and the application's Python libraries in a single file. Install
+Nmap for Windows before scanning. Nmap's packet-capture driver (Npcap) may be required for certain scan types; use
 the Nmap installer and follow its driver prompts. The EXE is built by the release workflow when a
 GitHub release is published.
 
@@ -80,10 +80,10 @@ Download the file for your operating system from the repository's [Releases page
 
 ### Debian or Ubuntu
 
-Open `nemesis-scanner-gui_1.1.0_all.deb` in the software installer, or run:
+Open `nemesis-scanner-gui_1.2.0_all.deb` in the software installer, or run:
 
 ```bash
-sudo apt install ./nemesis-scanner-gui_1.1.0_all.deb
+sudo apt install ./nemesis-scanner-gui_1.2.0_all.deb
 ```
 
 The package manager installs the declared dependencies. Start **Nemesis Scanner** from the
@@ -91,10 +91,10 @@ application menu or run `nemesis-scanner-gui`.
 
 ### Fedora-compatible Linux
 
-Open `nemesis-scanner-gui-1.1.0-1.x86_64.rpm` in Software, or run:
+Open `nemesis-scanner-gui-1.2.0-1.x86_64.rpm` in Software, or run:
 
 ```bash
-sudo dnf install ./nemesis-scanner-gui-1.1.0-1.x86_64.rpm
+sudo dnf install ./nemesis-scanner-gui-1.2.0-1.x86_64.rpm
 ```
 
 Start the application from the menu or run `nemesis-scanner-gui`.
@@ -104,7 +104,7 @@ Start the application from the menu or run `nemesis-scanner-gui`.
 Install the local package:
 
 ```bash
-sudo pacman -U ./nemesis-scanner-gui-1.1.0-1-any.pkg.tar.zst
+sudo pacman -U ./nemesis-scanner-gui-1.2.0-1-any.pkg.tar.zst
 ```
 
 Start it from the menu or run `nemesis-scanner-gui`. The release also includes `PKGBUILD` and a source
@@ -115,8 +115,8 @@ tarball for rebuilding with `makepkg`.
 Make the file executable, then launch it:
 
 ```bash
-chmod +x NemesisScanner-1.1.0-x86_64.AppImage
-./NemesisScanner-1.1.0-x86_64.AppImage
+chmod +x NemesisScanner-1.2.0-x86_64.AppImage
+./NemesisScanner-1.2.0-x86_64.AppImage
 ```
 
 Install Nmap separately. Depending on the Linux desktop, a compatible FUSE/AppImage runtime may
@@ -136,8 +136,10 @@ put it back in the scan form; double-click a recent report to open the reports p
 
 This page accepts one host, scan settings and authorization confirmation. When a scan starts, it
 runs in a worker thread so the interface remains responsive. The progress bar and status line show
-the current stage. The result area has separate **Detected services** and **Vulnerability
-findings** tabs.
+the current stage. Select **Cancel scan** to stop an active Nmap process and discard the unfinished
+report. During online vulnerability lookups, cancellation takes effect after the current network
+request returns. The result area has separate **Detected services** and **Vulnerability findings**
+tabs.
 
 ### Scan reports
 
@@ -157,8 +159,8 @@ intend to assess the host to which it resolves.
 
 | Profile | Ports and behavior | Typical use |
 | --- | --- | --- |
-| **Quick** | A curated set of commonly used TCP and UDP ports. It uses an aggressive timing template and a shorter host timeout. | Initial, short assessment. |
-| **Common** | TCP ports 1–1000 plus a curated set of common UDP ports. Identifies service versions and attempts OS detection. | Broader routine assessment. |
+| **Quick** | A curated set of commonly used TCP and UDP ports, including common printer ports. It uses an aggressive timing template and a shorter host timeout. | Initial, short assessment. |
+| **Common** | TCP ports 1–1000 plus TCP 9100 and a curated set of common UDP ports. Identifies service versions and attempts OS detection. | Broader routine assessment. |
 | **Full TCP** | All TCP ports (1–65535) plus common UDP ports. Identifies service versions and attempts OS detection. | Thorough port coverage; can take substantially longer. |
 
 Timing depends on host response, filtering, retries, network conditions and enabled checks. Full
@@ -300,8 +302,8 @@ that directory yourself if you no longer need the stored data.
 - Debian/Arch packages: `./build-deb-arch.sh` builds the DEB, a pacman package archive, a `PKGBUILD`
   and a source tarball. It requires `dpkg-deb`, `tar`, `zstd` and the Python nmap module on the
   build host.
-- Windows x64: run `build-windows.ps1` in PowerShell with Python available. The published GitHub
-  release workflow runs this script and attaches the resulting EXE.
+- Windows x64: run `build-windows.ps1` in PowerShell with Python available. It creates a dedicated
+  build environment and a single-file EXE under `dist/windows/`.
 
 Generated files are written to `dist/`, which is excluded from Git. Linux binary outputs are tied
 to the platform libraries on the build host; distribution packages should be built on their

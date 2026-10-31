@@ -2,21 +2,21 @@ from tkinter import ttk
 
 
 COLORS = {
-    "canvas": "#F3F5F7",
+    "canvas": "#EAF0F6",
     "panel": "#FFFFFF",
-    "ink": "#17233B",
-    "muted": "#738096",
-    "green": "#1267D6",
-    "green_dark": "#07152B",
-    "mint": "#E2EEFF",
-    "lime": "#56C8F2",
-    "coral": "#D66A4A",
-    "gold": "#C78B24",
-    "line": "#DEE5EF",
-    "soft": "#F5F7FA",
-    "red": "#C64949",
-    "blue_light": "#F0F6FF",
-    "blue_line": "#D7E6FB",
+    "ink": "#101828",
+    "muted": "#66758A",
+    "green": "#2563EB",
+    "green_dark": "#101B2D",
+    "mint": "#DBEAFE",
+    "lime": "#22D3EE",
+    "coral": "#E17654",
+    "gold": "#B7791F",
+    "line": "#D7E0EB",
+    "soft": "#F4F7FB",
+    "red": "#C83B45",
+    "blue_light": "#EFF6FF",
+    "blue_line": "#C7DAF4",
 }
 
 
@@ -32,9 +32,34 @@ def apply_theme(root):
     style.configure("Title.TLabel", font=("DejaVu Sans", 24, "bold"), foreground=COLORS["ink"])
     style.configure("Subtitle.TLabel", font=("DejaVu Sans", 10), foreground=COLORS["muted"])
     style.configure("Metric.TLabel", font=("DejaVu Sans", 25, "bold"), foreground=COLORS["ink"])
-    style.configure("TEntry", padding=(12, 10), fieldbackground=COLORS["soft"], bordercolor=COLORS["line"])
+    style.configure("TEntry", padding=(12, 10), fieldbackground=COLORS["panel"], foreground=COLORS["ink"], bordercolor=COLORS["line"])
     style.map("TEntry", bordercolor=[("focus", COLORS["green"])])
-    style.configure("TCombobox", padding=(10, 9), fieldbackground=COLORS["soft"], bordercolor=COLORS["line"])
+    style.configure(
+        "TCombobox",
+        padding=(10, 9),
+        fieldbackground=COLORS["panel"],
+        foreground=COLORS["ink"],
+        background=COLORS["soft"],
+        bordercolor=COLORS["line"],
+        lightcolor=COLORS["line"],
+        darkcolor=COLORS["line"],
+        arrowcolor=COLORS["muted"],
+        relief="flat",
+    )
+    style.map(
+        "TCombobox",
+        fieldbackground=[("readonly", COLORS["panel"]), ("disabled", COLORS["soft"])],
+        foreground=[("readonly", COLORS["ink"]), ("disabled", COLORS["muted"])],
+        selectbackground=[("readonly", COLORS["panel"])],
+        selectforeground=[("readonly", COLORS["ink"])],
+        background=[("active", COLORS["blue_light"])],
+        arrowcolor=[("disabled", COLORS["muted"])],
+    )
+    root.option_add("*TCombobox*Listbox.background", COLORS["panel"])
+    root.option_add("*TCombobox*Listbox.foreground", COLORS["ink"])
+    root.option_add("*TCombobox*Listbox.selectBackground", COLORS["green"])
+    root.option_add("*TCombobox*Listbox.selectForeground", "#FFFFFF")
+    root.option_add("*TCombobox*Listbox.font", ("DejaVu Sans", 9))
     style.configure("TCheckbutton", background=COLORS["panel"], foreground=COLORS["ink"], font=("DejaVu Sans", 10))
     style.configure("TNotebook", background=COLORS["panel"], borderwidth=0, tabmargins=(0, 0, 0, 0))
     style.configure("TNotebook.Tab", background=COLORS["soft"], foreground=COLORS["muted"], padding=(17, 11), font=("DejaVu Sans", 9, "bold"))
@@ -55,7 +80,7 @@ def apply_theme(root):
         padding=(13, 9),
         borderwidth=0,
     )
-    style.map("Secondary.TButton", background=[("active", "#C9E0D3")])
+    style.map("Secondary.TButton", background=[("active", "#C7DDFF")])
     style.configure(
         "Treeview",
         background=COLORS["panel"],

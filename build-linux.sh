@@ -12,8 +12,8 @@ python3 -m pip install --user -r requirements.txt pyinstaller
 
 rm -rf build dist/NemesisScanner dist/NemesisScanner.spec
 python3 -m PyInstaller --noconfirm --clean --onedir --windowed \
-  --name NemesisScanner --add-data "Logo.png:." --collect-data core \
-  --hidden-import=nmap --hidden-import=requests --hidden-import=PIL \
+  --name NemesisScanner --add-data "Logo-small.png:." --collect-data core \
+  --hidden-import=nmap --hidden-import=requests \
   main.py
 
 APPDIR="$OUT/NemesisScanner.AppDir"

@@ -1,6 +1,9 @@
-import json
+import os
+import platform
 import shutil
+import subprocess
 import tkinter as tk
+from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
 from ..services.scanner import load_reports, summarize_report
@@ -87,12 +90,65 @@ class ReportsPage(ttk.Frame):
         if not self.selected_path:
             messagebox.showinfo("Export report", "Select a report to export.", parent=self)
             return
-        destination = filedialog.asksaveasfilename(
-            parent=self,
-            title="Export report",
-            initialfile=self.selected_path.name,
-            defaultextension=".json",
-            filetypes=(("JSON report", "*.json"),),
-        )
+        report_path = self.selected_path
+        documents = Path.home() / "Documents"
+        initial_file = documents / report_path.name if documents.is_dir() else Path.home() / report_path.name
+        desktop = " ".join((os.environ.get("XDG_CURRENT_DESKTOP", ""), os.environ.get("DESKTOP_SESSION", ""))).lower()
+
+        destination = None
+        chooser_opened = False
+        if platform.system() == "Linux":
+            if "kde" in desktop:
+                chooser_order = ("kdialog", "zenity")
+            elif "gnome" in desktop:
+                chooser_order = ("zenity", "kdialog")
+            else:
+                chooser_order = ("kdialog", "zenity")
+
+            for chooser in chooser_order:
+                executable = shutil.which(chooser)
+                if not executable:
+                    continue
+                if chooser == "kdialog":
+                    command = [executable, "--title", "Export scan report", "--getsavefilename", str(initial_file), "JSON reports (*.json)"]
+                else:
+                    command = [
+                        executable, "--file-selection", "--save", "--confirm-overwrite",
+                        f"--filename={initial_file}", "--title=Export scan report",
+                        "--file-filter=JSON reports | *.json",
+                    ]
+                try:
+                    result = subprocess.run(command, capture_output=True, text=True, check=False)
+                except OSError:
+                    continue
+                chooser_opened = True
+                if result.returncode == 0 and result.stdout.strip():
+                    destination = result.stdout.strip()
+                break
+
+        if destination is None and platform.system() != "Linux":
+            destination = filedialog.asksaveasfilename(
+                parent=self,
+                title="Export report",
+                initialfile=report_path.name,
+                initialdir=str(initial_file.parent),
+                defaultextension=".json",
+                filetypes=(("JSON report", "*.json"),),
+            )
+        elif destination is None and not chooser_opened:
+            destination = filedialog.asksaveasfilename(
+                parent=self,
+                title="Export report",
+                initialfile=report_path.name,
+                initialdir=str(initial_file.parent),
+                defaultextension=".json",
+                filetypes=(("JSON report", "*.json"),),
+            )
+
         if destination:
-            shutil.copy2(self.selected_path, destination)
+            try:
+                shutil.copy2(report_path, destination)
+            except OSError as error:
+                messagebox.showerror("Export report", f"Could not export the report:\n{error}", parent=self)
+            else:
+                self.detail_subtitle.configure(text=f"Report exported to {destination}")

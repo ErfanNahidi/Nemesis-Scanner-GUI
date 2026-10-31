@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 .venv/
+.venv-windows-build/
 venv/
 
 # Packaging output

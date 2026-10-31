@@ -25,9 +25,11 @@ jobs:
         shell: pwsh
         run: ./build-windows.ps1
 
-      - name: Attach the executable to the release
+      - name: Attach the Windows app and portable bundle to the release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.release.tag_name }}
-          files: dist/windows/NemesisScanner.exe
+          files: |
+            dist/windows/NemesisScanner.exe
+            dist/windows/NemesisScanner-*-windows-x64.zip
           fail_on_unmatched_files: true

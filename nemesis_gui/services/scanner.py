@@ -82,6 +82,13 @@ class ScanWorker(threading.Thread):
         self.vulners_api_key = vulners_api_key
         self.elevate_nmap = elevate_nmap
         self.events = Queue()
+        self.cancel_event = threading.Event()
+        self.scanner = None
+
+    def cancel(self):
+        self.cancel_event.set()
+        if self.scanner is not None:
+            self.scanner.cancel_scan()
 
     def run(self):
         provider_warnings = []
@@ -98,6 +105,9 @@ class ScanWorker(threading.Thread):
         try:
             from core.core import NemesisScanner
 
+            if self.cancel_event.is_set():
+                raise InterruptedError("Scan cancelled by user.")
+
             provider_names = "NVD" if self.vuln_source == "online" else "local vulnerability database"
             if self.vulners_api_key and self.vuln_source == "online":
                 provider_names += " + Vulners"
@@ -113,22 +123,40 @@ class ScanWorker(threading.Thread):
                 vulners_api_key=self.vulners_api_key or None,
                 cve_lookup=self.vuln_source == "online",
                 elevate_nmap=self.elevate_nmap,
+                cancel_event=self.cancel_event,
             )
+            self.scanner = scanner
+            if self.cancel_event.is_set():
+                scanner.cancel_scan()
             report = asyncio.run(scanner.full_analysis())
+            if self.cancel_event.is_set():
+                raise InterruptedError("Scan cancelled by user.")
             if report is None:
                 raise RuntimeError("The target did not return a scan report. Check reachability and Nmap output.")
             if provider_warnings:
                 report["provider_warnings"] = list(dict.fromkeys(provider_warnings))
 
             REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+            if self.cancel_event.is_set():
+                raise InterruptedError("Scan cancelled by user.")
             stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             safe_target = re.sub(r"[^A-Za-z0-9_.-]+", "_", self.target)
             report_path = REPORTS_DIR / f"{safe_target}_{stamp}.json"
-            with report_path.open("w", encoding="utf-8") as report_file:
+            temporary_path = report_path.with_suffix(".json.tmp")
+            with temporary_path.open("w", encoding="utf-8") as report_file:
                 json.dump(report, report_file, indent=2, ensure_ascii=False)
                 report_file.write("\n")
+            if self.cancel_event.is_set():
+                temporary_path.unlink(missing_ok=True)
+                raise InterruptedError("Scan cancelled by user.")
+            temporary_path.replace(report_path)
             self.events.put(("complete", report, report_path))
         except Exception as error:
-            self.events.put(("error", str(error)))
+            if self.cancel_event.is_set():
+                self.events.put(("cancelled",))
+            else:
+                self.events.put(("error", str(error)))
         finally:
+            if "temporary_path" in locals():
+                temporary_path.unlink(missing_ok=True)
             scanner_logger.removeHandler(warning_handler)
