@@ -43,7 +43,8 @@ launch the source application with `sudo python main.py`.
 2. Enter one IPv4 address, IPv6 address, or hostname.
 3. Choose **Quick**, **Common**, or **Full TCP**.
 4. Select optional Nmap vulnerability scripts, active service checks, and a vulnerability data
-   source as needed.
+   source as needed. On Linux, enable **Request administrator access for Nmap** if the chosen
+   scan needs raw-packet privileges; the desktop will ask you to authorize Nmap.
 5. Confirm that you are authorized to assess the host, then select **Run scan**.
 6. Review detected services and findings. Completed scans appear in **Scan reports** and on the
    dashboard.

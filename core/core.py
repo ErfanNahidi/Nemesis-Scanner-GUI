@@ -8,8 +8,14 @@
 import logging
 import asyncio
 import concurrent.futures
+import os
+import platform
+import shlex
+import shutil
 import socket
 import ssl
+import tempfile
+import threading
 from typing import Dict, List, Optional, Any
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -26,6 +32,8 @@ from .vulnerability import (
 # Constants & Configuration
 # ---------------------------------------------------------------------------
 VERSION = "4.1.0"
+
+_PKEXEC_SCAN_LOCK = threading.Lock()
 
 EXPLOITDB_SEARCH = "https://www.exploit-db.com/search?cve="
 
@@ -252,6 +260,7 @@ class NemesisScanner:
         ipv6: bool = False,          # new: scan over IPv6
         vuln_source: str = "offline",
         cve_lookup: Optional[bool] = None,
+        elevate_nmap: bool = False,
     ):
         self.target = target
         self.threads = threads
@@ -274,6 +283,7 @@ class NemesisScanner:
         self.deep_inspect = deep_inspect
         self.skip_ping = skip_ping
         self.ipv6 = ipv6
+        self.elevate_nmap = bool(elevate_nmap)
 
         # Turbo mode overrides scan_mode and forces insane speed
         self.turbo = turbo
@@ -288,6 +298,41 @@ class NemesisScanner:
         self._target_ip = None  # will be resolved
         self._deep_check_cache = {}
         self._cve_cache = {}
+
+    def _run_nmap(self, arguments: str):
+        """Run Nmap normally, or through a graphical polkit prompt when requested."""
+        if not self.elevate_nmap:
+            return self.nm.scan(self.target, arguments=arguments)
+        if platform.system() != "Linux":
+            raise RuntimeError("Graphical administrator authorization is supported on Linux only.")
+        pkexec = shutil.which("pkexec")
+        if not pkexec:
+            raise RuntimeError(
+                "pkexec was not found. Install the polkit package for your Linux desktop, then try again."
+            )
+
+        # python-nmap supports sudo=True but hardcodes the terminal-oriented `sudo` command.
+        # Provide a private, temporary sudo shim that delegates only that invocation to pkexec.
+        # The GUI itself remains an unprivileged process and user files stay owned by the user.
+        with _PKEXEC_SCAN_LOCK, tempfile.TemporaryDirectory(prefix="nemesis-pkexec-") as helper_dir:
+            helper = os.path.join(helper_dir, "sudo")
+            nmap_path = self.nm._nmap_path
+            with open(helper, "w", encoding="utf-8") as script:
+                quoted_nmap = shlex.quote(nmap_path)
+                quoted_pkexec = shlex.quote(pkexec)
+                script.write(
+                    "#!/bin/sh\n"
+                    f"[ \"$1\" = {quoted_nmap} ] || exit 126\n"
+                    "shift\n"
+                    f"exec {quoted_pkexec} {quoted_nmap} \"$@\"\n"
+                )
+            os.chmod(helper, 0o700)
+            old_path = os.environ.get("PATH", "")
+            try:
+                os.environ["PATH"] = helper_dir + os.pathsep + old_path
+                return self.nm.scan(self.target, arguments=arguments, sudo=True)
+            finally:
+                os.environ["PATH"] = old_path
 
     def _resolve_target(self) -> str:
         """Resolve target to IP; for IPv6 we rely on nmap -6."""
@@ -407,11 +452,10 @@ class NemesisScanner:
         loop = asyncio.get_running_loop()
         nmap_args = self._nmap_arguments()
         logger.info(f"Scanning {self.target} with args: {nmap_args}")
-        # Fix: remove sudo=True (not supported by python-nmap)
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
             await loop.run_in_executor(
                 pool,
-                lambda: self.nm.scan(self.target, arguments=nmap_args)
+                lambda: self._run_nmap(nmap_args)
             )
 
         # Fallback for the false-empty result pattern: if a script-heavy quick scan finds host up
@@ -433,7 +477,7 @@ class NemesisScanner:
                 with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
                     await loop.run_in_executor(
                         pool,
-                        lambda: self.nm.scan(self.target, arguments=fallback_args)
+                        lambda: self._run_nmap(fallback_args)
                     )
                     host_data = self.nm[self.target]
 

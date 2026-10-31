@@ -1,6 +1,19 @@
+# Python caches and environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Packaging output
 /build/
 /dist/
-/NemesisScanner.spec
-__pycache__/
-/test
-/reports
+/*.spec
+
+# Local application data
+/reports/
+
+# Editors and operating systems
+.vscode/
+*.code-workspace
+.DS_Store
+Thumbs.db

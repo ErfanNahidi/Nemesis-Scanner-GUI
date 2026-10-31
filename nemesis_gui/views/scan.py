@@ -1,4 +1,5 @@
 import os
+import platform
 import tkinter as tk
 from tkinter import ttk
 
@@ -19,6 +20,7 @@ class ScanPage(ttk.Frame):
         self.vulners_key_var = tk.StringVar(value=os.environ.get("VULNERS_API_KEY", ""))
         self.vuln_var = tk.BooleanVar(value=False)
         self.deep_var = tk.BooleanVar(value=False)
+        self.elevate_var = tk.BooleanVar(value=False)
         self.authorized_var = tk.BooleanVar(value=False)
         self.profile_hint = tk.StringVar()
         self.columnconfigure(0, weight=1)
@@ -54,6 +56,14 @@ class ScanPage(ttk.Frame):
         options.columnconfigure(0, weight=1)
         ttk.Checkbutton(options, text="Run Nmap vulnerability scripts", variable=self.vuln_var).grid(row=0, column=0, sticky="w", pady=4)
         ttk.Checkbutton(options, text="Enable active service checks", variable=self.deep_var).grid(row=1, column=0, sticky="w", pady=4)
+        self.elevate_check = ttk.Checkbutton(
+            options,
+            text="Request administrator access for Nmap (Linux)",
+            variable=self.elevate_var,
+        )
+        self.elevate_check.grid(row=2, column=0, sticky="w", pady=4)
+        if platform.system() != "Linux":
+            self.elevate_check.configure(state="disabled")
         ttk.Label(options, text="VULNERABILITY DATA SOURCE", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=1, sticky="e", padx=(10, 7))
         self.source_combo = ttk.Combobox(options, textvariable=self.source_var, values=("Local database", "NVD online", "NVD + Vulners"), state="readonly", width=19)
         self.source_combo.grid(row=1, column=1, sticky="e", padx=(10, 0), pady=4)
@@ -183,11 +193,13 @@ class ScanPage(ttk.Frame):
             self.deep_var.get(),
             nvd_api_key=self.nvd_key_var.get().strip(),
             vulners_api_key=vulners_key,
+            elevate_nmap=self.elevate_var.get(),
         )
         self.scan_button.configure(state="disabled")
         self.progress.grid()
         self.progress.start(12)
-        self.status_label.configure(text=f"Scanning target {target}...", foreground=COLORS["green"])
+        status = "Requesting administrator authorization..." if self.elevate_var.get() else f"Scanning target {target}..."
+        self.status_label.configure(text=status, foreground=COLORS["green"])
         self.result_summary.configure(text=f"Data source: {provider}")
         self.worker.start()
 

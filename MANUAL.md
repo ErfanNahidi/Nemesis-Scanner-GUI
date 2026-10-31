@@ -255,10 +255,14 @@ safe.
 
 ### OS detection or a scan type needs privileges
 
-Some Nmap probes require raw-packet privileges. The GUI does not elevate itself and should not be
-started as root just to bypass this. Use the operating system's approved Nmap permission/capability
-setup, or run a profile that works with the current user's permissions. On Windows, check Npcap
-installation and driver status.
+Some Nmap probes require raw-packet privileges. On Linux, select **Request administrator access
+for Nmap** before starting the scan. The desktop's polkit authentication dialog will ask you to
+authorize Nmap; only the Nmap process is elevated, and the GUI and report files remain owned by
+your user. Install `pkexec` and make sure your desktop has a polkit authentication agent if the
+dialog does not appear. Leave the option off for scans that work without elevation. The option is
+not available on Windows or macOS; on Windows, check Npcap installation and driver status.
+
+Do not launch the whole GUI with `sudo`; that can put reports and application data in root's home.
 
 ### Online lookup fails
 

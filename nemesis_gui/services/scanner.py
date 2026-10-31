@@ -71,7 +71,7 @@ def load_reports():
 
 
 class ScanWorker(threading.Thread):
-    def __init__(self, target, scan_mode, vuln_check, vuln_source, deep_inspect, nvd_api_key="", vulners_api_key=""):
+    def __init__(self, target, scan_mode, vuln_check, vuln_source, deep_inspect, nvd_api_key="", vulners_api_key="", elevate_nmap=False):
         super().__init__(daemon=True)
         self.target = target
         self.scan_mode = scan_mode
@@ -80,6 +80,7 @@ class ScanWorker(threading.Thread):
         self.deep_inspect = deep_inspect
         self.nvd_api_key = nvd_api_key
         self.vulners_api_key = vulners_api_key
+        self.elevate_nmap = elevate_nmap
         self.events = Queue()
 
     def run(self):
@@ -100,7 +101,8 @@ class ScanWorker(threading.Thread):
             provider_names = "NVD" if self.vuln_source == "online" else "local vulnerability database"
             if self.vulners_api_key and self.vuln_source == "online":
                 provider_names += " + Vulners"
-            self.events.put(("status", f"Scanning and querying {provider_names}..."))
+            status = "Requesting desktop administrator authorization..." if self.elevate_nmap else "Scanning"
+            self.events.put(("status", f"{status} and querying {provider_names}..."))
             scanner = NemesisScanner(
                 self.target,
                 scan_mode=self.scan_mode,
@@ -110,6 +112,7 @@ class ScanWorker(threading.Thread):
                 nvd_api_key=self.nvd_api_key or None,
                 vulners_api_key=self.vulners_api_key or None,
                 cve_lookup=self.vuln_source == "online",
+                elevate_nmap=self.elevate_nmap,
             )
             report = asyncio.run(scanner.full_analysis())
             if report is None:
