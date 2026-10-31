@@ -1,6 +1,6 @@
 # Nemesis Scanner GUI — User Manual
 
-Version 1.0.0
+Version 1.1.0
 
 This manual covers installation, the three application screens, scan settings, vulnerability data,
 reports, data storage, and common problems. The interface is currently in English.
@@ -12,7 +12,7 @@ open ports and services. The application can then correlate the discovered servi
 with a bundled local vulnerability database or online providers. Completed scans are saved as
 JSON reports and can be reviewed or exported later.
 
-The GUI release number (1.0.0) is independent of the scanner engine version. The GUI is not a
+The GUI release number (1.1.0) is independent of the scanner engine version. The GUI is not a
 general-purpose vulnerability scanner and a reported match is not proof that a host is
 exploitable. Verify findings against the affected system and the cited vendor advisories.
 
@@ -80,10 +80,10 @@ Download the file for your operating system from the repository's [Releases page
 
 ### Debian or Ubuntu
 
-Open `nemesis-scanner-gui_1.0.0_all.deb` in the software installer, or run:
+Open `nemesis-scanner-gui_1.1.0_all.deb` in the software installer, or run:
 
 ```bash
-sudo apt install ./nemesis-scanner-gui_1.0.0_all.deb
+sudo apt install ./nemesis-scanner-gui_1.1.0_all.deb
 ```
 
 The package manager installs the declared dependencies. Start **Nemesis Scanner** from the
@@ -91,10 +91,10 @@ application menu or run `nemesis-scanner-gui`.
 
 ### Fedora-compatible Linux
 
-Open `nemesis-scanner-gui-1.0.0-1.x86_64.rpm` in Software, or run:
+Open `nemesis-scanner-gui-1.1.0-1.x86_64.rpm` in Software, or run:
 
 ```bash
-sudo dnf install ./nemesis-scanner-gui-1.0.0-1.x86_64.rpm
+sudo dnf install ./nemesis-scanner-gui-1.1.0-1.x86_64.rpm
 ```
 
 Start the application from the menu or run `nemesis-scanner-gui`.
@@ -104,7 +104,7 @@ Start the application from the menu or run `nemesis-scanner-gui`.
 Install the local package:
 
 ```bash
-sudo pacman -U ./nemesis-scanner-gui-1.0.0-1-any.pkg.tar.zst
+sudo pacman -U ./nemesis-scanner-gui-1.1.0-1-any.pkg.tar.zst
 ```
 
 Start it from the menu or run `nemesis-scanner-gui`. The release also includes `PKGBUILD` and a source
@@ -115,8 +115,8 @@ tarball for rebuilding with `makepkg`.
 Make the file executable, then launch it:
 
 ```bash
-chmod +x NemesisScanner-1.0.0-x86_64.AppImage
-./NemesisScanner-1.0.0-x86_64.AppImage
+chmod +x NemesisScanner-1.1.0-x86_64.AppImage
+./NemesisScanner-1.1.0-x86_64.AppImage
 ```
 
 Install Nmap separately. Depending on the Linux desktop, a compatible FUSE/AppImage runtime may

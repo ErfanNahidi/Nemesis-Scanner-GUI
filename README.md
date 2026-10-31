@@ -6,7 +6,7 @@ Nemesis Scanner is a desktop interface for assessing one authorized host at a ti
 to discover ports and services, can correlate findings with local or online vulnerability data,
 and saves each completed assessment as a JSON report.
 
-The GUI release version is **1.0.0**. It is independent of the scanner engine version.
+The GUI release version is **1.1.0**. It is independent of the scanner engine version.
 
 ## Install
 
@@ -15,10 +15,10 @@ Download an asset from the [GitHub Releases page](https://github.com/ErfanNahidi
 | Platform | Asset | Install / run |
 | --- | --- | --- |
 | Windows x64 | `NemesisScanner.exe` | Download and open. Install Nmap separately for scans. |
-| Fedora-compatible Linux x86_64 | `nemesis-scanner-gui-1.0.0-1.x86_64.rpm` | Open in Software, or run `sudo dnf install ./nemesis-scanner-gui-1.0.0-1.x86_64.rpm`. |
-| Debian or Ubuntu | `nemesis-scanner-gui_1.0.0_all.deb` | Open in the package installer, or run `sudo apt install ./nemesis-scanner-gui_1.0.0_all.deb`. |
-| Arch Linux | `nemesis-scanner-gui-1.0.0-1-any.pkg.tar.zst` | Run `sudo pacman -U ./nemesis-scanner-gui-1.0.0-1-any.pkg.tar.zst`. |
-| Portable Linux x86_64 | `NemesisScanner-1.0.0-x86_64.AppImage` | Mark executable, then open it. Nmap must be installed on the host. |
+| Fedora-compatible Linux x86_64 | `nemesis-scanner-gui-1.1.0-1.x86_64.rpm` | Open in Software, or run `sudo dnf install ./nemesis-scanner-gui-1.1.0-1.x86_64.rpm`. |
+| Debian or Ubuntu | `nemesis-scanner-gui_1.1.0_all.deb` | Open in the package installer, or run `sudo apt install ./nemesis-scanner-gui_1.1.0_all.deb`. |
+| Arch Linux | `nemesis-scanner-gui-1.1.0-1-any.pkg.tar.zst` | Run `sudo pacman -U ./nemesis-scanner-gui-1.1.0-1-any.pkg.tar.zst`. |
+| Portable Linux x86_64 | `NemesisScanner-1.1.0-x86_64.AppImage` | Mark executable, then open it. Nmap must be installed on the host. |
 
 On Linux, launch the GUI with `nemesis-scanner-gui`; the CLI keeps the separate `nemesis-scanner` command. The DEB and Arch packages use the platform's Python/Tk libraries and let `apt` or `pacman`
 install declared dependencies. The Windows executable bundles Python and the GUI's Python
