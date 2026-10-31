@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 
-DEFAULT_HISTORY_PATH = Path(__file__).resolve().parent.parent / "reports" / "recent_targets.json"
+DEFAULT_HISTORY_PATH = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "nemesis-scanner" / "recent_targets.json"
 
 
 class RecentTargetStore:

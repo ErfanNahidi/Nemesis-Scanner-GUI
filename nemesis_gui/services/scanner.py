@@ -2,6 +2,7 @@ import asyncio
 import ipaddress
 import json
 import logging
+import os
 import re
 import threading
 from datetime import datetime
@@ -9,8 +10,7 @@ from pathlib import Path
 from queue import Queue
 
 
-GUI_ROOT = Path(__file__).resolve().parents[2]
-REPORTS_DIR = GUI_ROOT / "reports"
+REPORTS_DIR = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "nemesis-scanner" / "reports"
 
 
 def validate_target(value):
