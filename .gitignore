@@ -2,3 +2,5 @@
 /dist/
 /NemesisScanner.spec
 __pycache__/
+/test
+/reports
