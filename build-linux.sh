@@ -56,6 +56,7 @@ RPMBUILD="$OUT/rpmbuild"
 mkdir -p "$RPMBUILD/BUILD" "$RPMBUILD/BUILDROOT" "$RPMBUILD/RPMS" "$RPMBUILD/SOURCES" "$RPMBUILD/SPECS" "$RPMBUILD/SRPMS" "$RPMBUILD/TMP"
 tar -C "$RPMROOT" -czf "$RPMBUILD/SOURCES/nemesis-scanner-root.tar.gz" .
 cat > "$RPMBUILD/SPECS/nemesis-scanner.spec" <<EOF
+%global __requires_exclude ^lib(gfortran|quadmath)-.*
 Name:           nemesis-scanner
 %global debug_package %{nil}
 Version:        $VERSION
