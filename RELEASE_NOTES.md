@@ -2,6 +2,10 @@
 
 First stable release of the Nemesis Scanner desktop interface.
 
+The Linux GUI package is named `nemesis-scanner-gui` and installs the `nemesis-scanner-gui`
+command. The CLI package keeps the separate `nemesis-scanner` command so both can be installed
+side by side.
+
 ## Highlights
 
 - Desktop dashboard, single-host network scans and a searchable local JSON report archive.

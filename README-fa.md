@@ -14,7 +14,7 @@ Nemesis Scanner یک برنامهٔ دسکتاپ برای ارزیابی یک م
 | سیستم‌عامل | فایل | نصب یا اجرا |
 | --- | --- | --- |
 | Windows x64 | `NemesisScanner.exe` | فایل را دانلود و باز کنید. برای اسکن، Nmap ویندوز را جداگانه نصب کنید. |
-| Fedora-compatible Linux x86_64 | `nemesis-scanner-1.0.0-1.x86_64.rpm` | با Software باز کنید یا `sudo dnf install ./nemesis-scanner-1.0.0-1.x86_64.rpm` را اجرا کنید. |
+| Fedora-compatible Linux x86_64 | `nemesis-scanner-gui-1.0.0-1.x86_64.rpm` | با Software باز کنید یا `sudo dnf install ./nemesis-scanner-gui-1.0.0-1.x86_64.rpm` را اجرا کنید. |
 | Debian یا Ubuntu | `nemesis-scanner-gui_1.0.0_all.deb` | با نصب‌کنندهٔ بسته باز کنید یا `sudo apt install ./nemesis-scanner-gui_1.0.0_all.deb` را اجرا کنید. |
 | Arch Linux | `nemesis-scanner-gui-1.0.0-1-any.pkg.tar.zst` | `sudo pacman -U ./nemesis-scanner-gui-1.0.0-1-any.pkg.tar.zst` را اجرا کنید. |
 | Linux قابل‌حمل x86_64 | `NemesisScanner-1.0.0-x86_64.AppImage` | مجوز اجرا بدهید و فایل را باز کنید. Nmap باید روی سیستم نصب باشد. |

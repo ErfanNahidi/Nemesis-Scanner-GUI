@@ -87,17 +87,17 @@ sudo apt install ./nemesis-scanner-gui_1.0.0_all.deb
 ```
 
 The package manager installs the declared dependencies. Start **Nemesis Scanner** from the
-application menu or run `nemesis-scanner`.
+application menu or run `nemesis-scanner-gui`.
 
 ### Fedora-compatible Linux
 
-Open `nemesis-scanner-1.0.0-1.x86_64.rpm` in Software, or run:
+Open `nemesis-scanner-gui-1.0.0-1.x86_64.rpm` in Software, or run:
 
 ```bash
-sudo dnf install ./nemesis-scanner-1.0.0-1.x86_64.rpm
+sudo dnf install ./nemesis-scanner-gui-1.0.0-1.x86_64.rpm
 ```
 
-Start the application from the menu or run `nemesis-scanner`.
+Start the application from the menu or run `nemesis-scanner-gui`.
 
 ### Arch Linux
 
@@ -107,7 +107,7 @@ Install the local package:
 sudo pacman -U ./nemesis-scanner-gui-1.0.0-1-any.pkg.tar.zst
 ```
 
-Start it from the menu or run `nemesis-scanner`. The release also includes `PKGBUILD` and a source
+Start it from the menu or run `nemesis-scanner-gui`. The release also includes `PKGBUILD` and a source
 tarball for rebuilding with `makepkg`.
 
 ### AppImage
@@ -280,7 +280,7 @@ Tkinter module is available in the Python environment used to launch the applica
 ## 10. Uninstall
 
 - Debian/Ubuntu: `sudo apt remove nemesis-scanner-gui`
-- Fedora-compatible: `sudo dnf remove nemesis-scanner`
+- Fedora-compatible: `sudo dnf remove nemesis-scanner-gui`
 - Arch: `sudo pacman -R nemesis-scanner-gui`
 - AppImage: delete the AppImage file.
 - Windows: delete the downloaded EXE; the one-file program does not install itself.

@@ -21,18 +21,18 @@ copy_app() {
   find "$root/usr/share/nemesis-scanner-gui" -type f -name '*.pyc' -delete
   cp README.md README-fa.md MANUAL.md "$root/usr/share/nemesis-scanner-gui/"
   cp Logo.png "$root/usr/share/icons/hicolor/256x256/apps/nemesis-scanner.png"
-  cat > "$root/usr/bin/nemesis-scanner" <<'EOF'
+  cat > "$root/usr/bin/nemesis-scanner-gui" <<'EOF'
 #!/usr/bin/env sh
 cd /usr/share/nemesis-scanner-gui
 exec python3 /usr/share/nemesis-scanner-gui/main.py "$@"
 EOF
-  chmod 755 "$root/usr/bin/nemesis-scanner"
+  chmod 755 "$root/usr/bin/nemesis-scanner-gui"
   cat > "$root/usr/share/applications/nemesis-scanner.desktop" <<'EOF'
 [Desktop Entry]
 Type=Application
 Name=Nemesis Scanner
 Comment=Network scanner and report viewer
-Exec=nemesis-scanner
+Exec=nemesis-scanner-gui
 Icon=nemesis-scanner
 Categories=Utility;Network;Security;
 Terminal=false
@@ -107,18 +107,18 @@ package() {
   install -d "\$pkgdir/usr/share/nemesis-scanner-gui" "\$pkgdir/usr/bin" \\
     "\$pkgdir/usr/share/applications" "\$pkgdir/usr/share/icons/hicolor/256x256/apps"
   cp -a main.py core nemesis_gui nmap Logo.png README.md README-fa.md MANUAL.md "\$pkgdir/usr/share/nemesis-scanner-gui/"
-  cat > "\$pkgdir/usr/bin/nemesis-scanner" <<'LAUNCHER'
+  cat > "\$pkgdir/usr/bin/nemesis-scanner-gui" <<'LAUNCHER'
 #!/usr/bin/env sh
 cd /usr/share/nemesis-scanner-gui
 exec python3 /usr/share/nemesis-scanner-gui/main.py "\$@"
 LAUNCHER
-  chmod 755 "\$pkgdir/usr/bin/nemesis-scanner"
+  chmod 755 "\$pkgdir/usr/bin/nemesis-scanner-gui"
   cat > "\$pkgdir/usr/share/applications/nemesis-scanner.desktop" <<'DESKTOP'
 [Desktop Entry]
 Type=Application
 Name=Nemesis Scanner
 Comment=Network scanner and report viewer
-Exec=nemesis-scanner
+Exec=nemesis-scanner-gui
 Icon=nemesis-scanner
 Categories=Utility;Network;Security;
 Terminal=false

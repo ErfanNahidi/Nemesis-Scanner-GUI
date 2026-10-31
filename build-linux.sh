@@ -27,7 +27,7 @@ cat > "$APPDIR/nemesis-scanner.desktop" <<'EOF'
 Type=Application
 Name=Nemesis Scanner
 Comment=Network scanner and report viewer
-Exec=nemesis-scanner
+Exec=AppRun
 Icon=nemesis-scanner
 Categories=Utility;Network;Security;
 Terminal=false
@@ -46,18 +46,19 @@ rm -rf "$RPMROOT"
 mkdir -p "$RPMROOT/opt/nemesis-scanner" "$RPMROOT/usr/bin" "$RPMROOT/usr/share/applications" "$RPMROOT/usr/share/icons/hicolor/256x256/apps"
 cp -a dist/NemesisScanner/. "$RPMROOT/opt/nemesis-scanner/"
 cp Logo.png "$RPMROOT/usr/share/icons/hicolor/256x256/apps/nemesis-scanner.png"
-cp "$APPDIR/nemesis-scanner.desktop" "$RPMROOT/usr/share/applications/"
-cat > "$RPMROOT/usr/bin/nemesis-scanner" <<'EOF'
+sed 's/^Exec=AppRun$/Exec=nemesis-scanner-gui/' \
+  "$APPDIR/nemesis-scanner.desktop" > "$RPMROOT/usr/share/applications/nemesis-scanner.desktop"
+cat > "$RPMROOT/usr/bin/nemesis-scanner-gui" <<'EOF'
 #!/usr/bin/env bash
 exec /opt/nemesis-scanner/NemesisScanner "$@"
 EOF
-chmod +x "$RPMROOT/usr/bin/nemesis-scanner"
+chmod +x "$RPMROOT/usr/bin/nemesis-scanner-gui"
 RPMBUILD="$OUT/rpmbuild"
 mkdir -p "$RPMBUILD/BUILD" "$RPMBUILD/BUILDROOT" "$RPMBUILD/RPMS" "$RPMBUILD/SOURCES" "$RPMBUILD/SPECS" "$RPMBUILD/SRPMS" "$RPMBUILD/TMP"
-tar -C "$RPMROOT" -czf "$RPMBUILD/SOURCES/nemesis-scanner-root.tar.gz" .
+tar -C "$RPMROOT" -czf "$RPMBUILD/SOURCES/nemesis-scanner-gui-root.tar.gz" .
 cat > "$RPMBUILD/SPECS/nemesis-scanner.spec" <<EOF
 %global __requires_exclude ^lib(gfortran|quadmath)-.*
-Name:           nemesis-scanner
+Name:           nemesis-scanner-gui
 %global debug_package %{nil}
 Version:        $VERSION
 Release:        1%{?dist}
@@ -65,7 +66,7 @@ Summary:        Nemesis Scanner graphical desktop application
 License:        Unknown
 BuildArch:      x86_64
 Requires:       nmap
-Source0:        nemesis-scanner-root.tar.gz
+Source0:        nemesis-scanner-gui-root.tar.gz
 
 %description
 Nemesis Scanner graphical network scanning and report viewer.
@@ -80,12 +81,12 @@ cp -a . %{buildroot}/
 
 %files
 /opt/nemesis-scanner
-/usr/bin/nemesis-scanner
+/usr/bin/nemesis-scanner-gui
 /usr/share/applications/nemesis-scanner.desktop
 /usr/share/icons/hicolor/256x256/apps/nemesis-scanner.png
 EOF
 rpmbuild --define "_topdir $RPMBUILD" --define "_tmppath $RPMBUILD/TMP" -bb "$RPMBUILD/SPECS/nemesis-scanner.spec"
-cp "$RPMBUILD/RPMS/x86_64/nemesis-scanner-${VERSION}-1"*.rpm "$OUT/nemesis-scanner-${VERSION}-1.x86_64.rpm"
+cp "$RPMBUILD/RPMS/x86_64/nemesis-scanner-gui-${VERSION}-1"*.rpm "$OUT/nemesis-scanner-gui-${VERSION}-1.x86_64.rpm"
 
 APPIMAGETOOL="${APPIMAGETOOL:-$(command -v appimagetool || true)}"
 if [[ -n "$APPIMAGETOOL" ]]; then
@@ -97,4 +98,4 @@ if [[ -n "$APPIMAGETOOL" ]]; then
 else
   echo "AppDir created at $APPDIR; appimagetool is missing, so AppImage could not be finalized." >&2
 fi
-echo "RPM: $OUT/nemesis-scanner-${VERSION}-1.x86_64.rpm"
+echo "RPM: $OUT/nemesis-scanner-gui-${VERSION}-1.x86_64.rpm"
