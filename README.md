@@ -1,5 +1,7 @@
 # Nemesis Scanner GUI
 
+[برای زبان فارسی اینجا کلیک کنید](README-fa.md)
+
 Nemesis Scanner is a desktop interface for assessing one authorized host at a time. It uses Nmap
 to discover ports and services, can correlate findings with local or online vulnerability data,
 and saves each completed assessment as a JSON report.
