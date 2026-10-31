@@ -1,32 +1,25 @@
-# Nemesis Scanner GUI 1.2.0
+# Nemesis Scanner GUI 1.2.1
 
-This release improves scan cancellation and reliability, refreshes the desktop interface, and uses
-native file selection dialogs when exporting reports.
+This release adds an in-app update center and gives the developer credit a prominent place in the
+interface.
 
 ## What's changed
 
-- Added a working **Cancel scan** action that stops the active Nmap process and discards incomplete
-  scan results.
-- Improved Nmap process handling, output parsing, and cancellation behavior, including Linux
-  administrator-authorized scans.
-- Updated scan presets and bounded HTTP response-header reads to avoid unnecessary delays.
-- Replaced the dated cream-colored controls with a cooler blue-gray palette and clearer comboboxes.
-- Report export now opens the desktop's native file chooser: KDE's picker on KDE, GNOME's picker on
-  GNOME, and the platform-native Tk dialog on Windows and macOS.
-- Refreshed the English and Persian installation instructions and the complete user manual.
-- Prepared release packaging for Fedora/RPM, Debian/Ubuntu, Arch Linux, AppImage, and Windows x64.
+- Added a dedicated **Updates** page in the sidebar.
+- The app checks GitHub for the latest stable release, compares versions, and recommends the package
+  for Windows, Fedora/RPM, Debian/Ubuntu, or Arch. Other Linux distributions can use the AppImage.
+- Added in-app downloads with progress reporting. Files are saved in the user's Downloads folder,
+  existing files are preserved, and incomplete downloads are discarded. The app can open the folder
+  containing the downloaded update.
+- Added release notes and a direct link to the full GitHub release from the Updates page.
+- Prominently credited developer **Erfan Nahidi** with a clickable GitHub profile link to
+  [github.com/ErfanNahidi](https://github.com/ErfanNahidi).
+- Updated the English and Persian README files and user manual for version 1.2.1.
 
-## Platform notes
+## Updating
 
-Nmap remains a system dependency. Install Nmap separately before scanning; on Windows, install it
-with the official Nmap installer, which can also provide Npcap for scan types that need it. On
-Linux, package managers install the declared Nmap dependency. AppImage users need Nmap installed on
-the host.
+Open **Updates** in the app and select **Check for updates**. Choose the recommended download and
+install it using the normal installer for your operating system. Windows updates are distributed as
+a portable executable; Nmap remains a separate requirement for scanning.
 
-Linux scans that need raw packet access can request desktop administrator authorization. Only the
-Nmap process is elevated; the GUI and report files remain under the signed-in user.
-
-## Downloads
-
-Choose the installer for your operating system from the GitHub release assets. See `README.md` for
-quick installation and `MANUAL.md` for detailed setup and usage instructions.
+Use the application only on systems you own or are explicitly authorized to assess.

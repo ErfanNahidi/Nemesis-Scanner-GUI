@@ -11,6 +11,7 @@ from .theme import COLORS, apply_theme
 from .views.dashboard import DashboardPage
 from .views.reports import ReportsPage
 from .views.scan import ScanPage
+from .views.updates import UpdatesPage
 
 
 class NemesisApp(tk.Tk):
@@ -66,7 +67,12 @@ class NemesisApp(tk.Tk):
         tk.Label(sidebar, text="WORKSPACE", bg=COLORS["green_dark"], fg="#8798B1", font=("DejaVu Sans", 8, "bold")).pack(anchor="w", pady=(0, 10))
         self.nav_buttons = {}
         self.nav_rows = {}
-        for key, label in (("dashboard", "Dashboard"), ("scan", "Network scan"), ("reports", "Scan reports")):
+        for key, label in (
+            ("dashboard", "Dashboard"),
+            ("scan", "Network scan"),
+            ("reports", "Scan reports"),
+            ("updates", "Updates"),
+        ):
             row = tk.Frame(sidebar, bg=COLORS["green_dark"])
             row.pack(fill="x", pady=2)
             indicator = tk.Frame(row, bg=COLORS["green_dark"], width=3)
@@ -115,6 +121,7 @@ class NemesisApp(tk.Tk):
             "dashboard": DashboardPage(self.content, self),
             "scan": ScanPage(self.content, self),
             "reports": ReportsPage(self.content),
+            "updates": UpdatesPage(self.content),
         }
         for page in self.pages.values():
             page.grid(row=0, column=0, sticky="nsew")
@@ -127,7 +134,14 @@ class NemesisApp(tk.Tk):
         self.current_page = self.pages[name]
         self.current_page.grid()
         self.current_page.tkraise()
-        self.page_title.configure(text={"dashboard": "Dashboard", "scan": "Network scan", "reports": "Scan reports"}[name])
+        self.page_title.configure(
+            text={
+                "dashboard": "Dashboard",
+                "scan": "Network scan",
+                "reports": "Scan reports",
+                "updates": "Updates",
+            }[name]
+        )
         for key, button in self.nav_buttons.items():
             active = key == name
             color = "#142949" if active else COLORS["green_dark"]

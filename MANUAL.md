@@ -1,8 +1,8 @@
 # Nemesis Scanner GUI — User Manual
 
-Version 1.2.0
+Version 1.2.1
 
-This manual covers installation, the three application screens, scan settings, vulnerability data,
+This manual covers installation, the four application screens, scan settings, vulnerability data,
 reports, data storage, and common problems. The interface is currently in English.
 
 ## 1. What the application does
@@ -12,7 +12,7 @@ open ports and services. The application can then correlate the discovered servi
 with a bundled local vulnerability database or online providers. Completed scans are saved as
 JSON reports and can be reviewed or exported later.
 
-The GUI release number (1.2.0) is independent of the scanner engine version. The GUI is not a
+The GUI version is independent of the scanner engine version. The GUI is not a
 general-purpose vulnerability scanner and a reported match is not proof that a host is
 exploitable. Verify findings against the affected system and the cited vendor advisories.
 
@@ -69,6 +69,14 @@ start the source application with `sudo python main.py`.
 
 Download the file for your operating system from the repository's [Releases page](https://github.com/ErfanNahidi/Nemesis-Scanner-GUI/releases).
 
+### Check for updates in the application
+
+Open **Updates** in the sidebar and choose **Check for updates**. The application checks GitHub for
+the latest stable release, recommends a compatible installer for the current operating system,
+and can download the selected release asset into the user's Downloads folder. Use the system's
+normal package installer to complete a package update. The page displays release notes and credits
+the developer, **Erfan Nahidi**.
+
 ### Windows
 
 1. Download `NemesisScanner.exe` and open it.
@@ -80,10 +88,10 @@ Download the file for your operating system from the repository's [Releases page
 
 ### Debian or Ubuntu
 
-Open `nemesis-scanner-gui_1.2.0_all.deb` in the software installer, or run:
+Open `nemesis-scanner-gui_1.2.1_all.deb` in the software installer, or run:
 
 ```bash
-sudo apt install ./nemesis-scanner-gui_1.2.0_all.deb
+sudo apt install ./nemesis-scanner-gui_1.2.1_all.deb
 ```
 
 The package manager installs the declared dependencies. Start **Nemesis Scanner** from the
@@ -91,10 +99,10 @@ application menu or run `nemesis-scanner-gui`.
 
 ### Fedora-compatible Linux
 
-Open `nemesis-scanner-gui-1.2.0-1.x86_64.rpm` in Software, or run:
+Open `nemesis-scanner-gui-1.2.1-1.x86_64.rpm` in Software, or run:
 
 ```bash
-sudo dnf install ./nemesis-scanner-gui-1.2.0-1.x86_64.rpm
+sudo dnf install ./nemesis-scanner-gui-1.2.1-1.x86_64.rpm
 ```
 
 Start the application from the menu or run `nemesis-scanner-gui`.
@@ -104,7 +112,7 @@ Start the application from the menu or run `nemesis-scanner-gui`.
 Install the local package:
 
 ```bash
-sudo pacman -U ./nemesis-scanner-gui-1.2.0-1-any.pkg.tar.zst
+sudo pacman -U ./nemesis-scanner-gui-1.2.1-1-any.pkg.tar.zst
 ```
 
 Start it from the menu or run `nemesis-scanner-gui`. The release also includes `PKGBUILD` and a source
@@ -115,8 +123,8 @@ tarball for rebuilding with `makepkg`.
 Make the file executable, then launch it:
 
 ```bash
-chmod +x NemesisScanner-1.2.0-x86_64.AppImage
-./NemesisScanner-1.2.0-x86_64.AppImage
+chmod +x NemesisScanner-1.2.1-x86_64.AppImage
+./NemesisScanner-1.2.1-x86_64.AppImage
 ```
 
 Install Nmap separately. Depending on the Linux desktop, a compatible FUSE/AppImage runtime may

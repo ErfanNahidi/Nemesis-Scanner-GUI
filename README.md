@@ -6,7 +6,8 @@ Nemesis Scanner is a desktop interface for assessing one authorized host at a ti
 to discover ports and services, can correlate findings with local or online vulnerability data,
 and saves each completed assessment as a JSON report.
 
-The GUI release version is **1.2.0**. It is independent of the scanner engine version.
+The GUI release version is **1.2.1**. The GUI version
+is independent of the scanner engine version.
 
 ## Install
 
@@ -15,10 +16,10 @@ Download an asset from the [GitHub Releases page](https://github.com/ErfanNahidi
 | Platform | Asset | Install / run |
 | --- | --- | --- |
 | Windows x64 | `NemesisScanner.exe` | Download and open. Install Nmap separately for scans. |
-| Fedora-compatible Linux x86_64 | `nemesis-scanner-gui-1.2.0-1.x86_64.rpm` | Open in Software, or run `sudo dnf install ./nemesis-scanner-gui-1.2.0-1.x86_64.rpm`. |
-| Debian or Ubuntu | `nemesis-scanner-gui_1.2.0_all.deb` | Open in the package installer, or run `sudo apt install ./nemesis-scanner-gui_1.2.0_all.deb`. |
-| Arch Linux | `nemesis-scanner-gui-1.2.0-1-any.pkg.tar.zst` | Run `sudo pacman -U ./nemesis-scanner-gui-1.2.0-1-any.pkg.tar.zst`. |
-| Portable Linux x86_64 | `NemesisScanner-1.2.0-x86_64.AppImage` | Mark executable, then open it. Nmap must be installed on the host. |
+| Fedora-compatible Linux x86_64 | `nemesis-scanner-gui-1.2.1-1.x86_64.rpm` | Open in Software, or run `sudo dnf install ./nemesis-scanner-gui-1.2.1-1.x86_64.rpm`. |
+| Debian or Ubuntu | `nemesis-scanner-gui_1.2.1_all.deb` | Open in the package installer, or run `sudo apt install ./nemesis-scanner-gui_1.2.1_all.deb`. |
+| Arch Linux | `nemesis-scanner-gui-1.2.1-1-any.pkg.tar.zst` | Run `sudo pacman -U ./nemesis-scanner-gui-1.2.1-1-any.pkg.tar.zst`. |
+| Portable Linux x86_64 | `NemesisScanner-1.2.1-x86_64.AppImage` | Mark executable, then open it. Nmap must be installed on the host. |
 
 On Linux, launch the GUI with `nemesis-scanner-gui`. The DEB and Arch packages use the platform's
 Python/Tk libraries and let `apt` or `pacman` install declared dependencies. The Windows executable
@@ -51,6 +52,14 @@ launch the source application with `sudo python main.py`.
 6. Select **Cancel scan** at any time to stop and discard an unfinished scan.
 7. Review detected services and findings. Completed scans appear in **Scan reports** and on the
    dashboard.
+
+## Check for updates
+
+Open **Updates** in the sidebar and select **Check for updates**. The page checks the project's
+latest stable GitHub release, recommends a file for the current operating system, and downloads
+the selected asset into your Downloads folder. Install a downloaded package with the operating
+system's normal installer. The Updates page also shows release notes and credits developer **Erfan
+Nahidi**.
 
 Only scan systems you own or have explicit permission to assess. See [MANUAL.md](MANUAL.md) for
 installation details, scan options, report handling, API keys, privacy, and troubleshooting.
