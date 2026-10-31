@@ -16,9 +16,14 @@ from .views.updates import UpdatesPage
 
 class NemesisApp(tk.Tk):
     def __init__(self):
-        super().__init__()
+        if platform.system() == "Linux":
+            # Tk 9 no longer exposes `wm class`; set X11's resource/class names at creation.
+            super().__init__(baseName="nemesis-scanner", className="NemesisScanner")
+        else:
+            super().__init__()
         apply_theme(self)
         self.title(f"Nemesis Scanner GUI {__version__}")
+        self.window_icon = None
         if platform.system() == "Windows":
             icon_path = Path(__file__).resolve().parents[1] / "NemesisScanner.ico"
             if icon_path.is_file():
@@ -26,6 +31,15 @@ class NemesisApp(tk.Tk):
                     self.iconbitmap(str(icon_path))
                 except tk.TclError:
                     pass
+        elif platform.system() == "Linux":
+            # Match the desktop launcher's StartupWMClass so GNOME/KDE can use its icon.
+            icon_path = Path(__file__).resolve().parents[1] / "Logo-small.png"
+            if icon_path.is_file():
+                try:
+                    self.window_icon = tk.PhotoImage(file=str(icon_path), master=self)
+                    self.iconphoto(True, self.window_icon)
+                except (OSError, tk.TclError):
+                    self.window_icon = None
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
         window_width = min(1440, screen_width - 40)

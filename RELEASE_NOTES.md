@@ -1,25 +1,21 @@
-# Nemesis Scanner GUI 1.2.1
+# Nemesis Scanner GUI 1.2.2
 
-This release adds an in-app update center and gives the developer credit a prominent place in the
-interface.
+This patch fixes the Linux window identity and icon setup so Fedora's desktop taskbar can display
+the Nemesis Scanner logo instead of Tk's default X icon.
 
 ## What's changed
 
-- Added a dedicated **Updates** page in the sidebar.
-- The app checks GitHub for the latest stable release, compares versions, and recommends the package
-  for Windows, Fedora/RPM, Debian/Ubuntu, or Arch. Other Linux distributions can use the AppImage.
-- Added in-app downloads with progress reporting. Files are saved in the user's Downloads folder,
-  existing files are preserved, and incomplete downloads are discarded. The app can open the folder
-  containing the downloaded update.
-- Added release notes and a direct link to the full GitHub release from the Updates page.
-- Prominently credited developer **Erfan Nahidi** with a clickable GitHub profile link to
-  [github.com/ErfanNahidi](https://github.com/ErfanNahidi).
-- Updated the English and Persian README files and user manual for version 1.2.1.
+- Set the Linux Tk application and window class at window creation. This works with Tk 9, where the
+  older `wm class` command is unavailable.
+- Apply the bundled Nemesis logo as the Linux window icon.
+- Match the window class with `StartupWMClass` in the RPM, DEB, Arch, and AppImage desktop launchers
+  so GNOME, KDE, and other X11 desktop shells can associate the running window with its app icon.
+- Kept Windows icon handling unchanged.
 
 ## Updating
 
-Open **Updates** in the app and select **Check for updates**. Choose the recommended download and
-install it using the normal installer for your operating system. Windows updates are distributed as
-a portable executable; Nmap remains a separate requirement for scanning.
+Use the **Updates** page to check GitHub and download the package for your system. After installing
+this update, close and reopen Nemesis Scanner to refresh the taskbar icon.
 
-Use the application only on systems you own or are explicitly authorized to assess.
+Nmap remains a separate system requirement for scans. See `README.md` and `MANUAL.md` for
+installation details.

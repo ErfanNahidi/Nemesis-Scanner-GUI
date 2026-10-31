@@ -29,6 +29,7 @@ Name=Nemesis Scanner
 Comment=Network scanner and report viewer
 Exec=AppRun
 Icon=nemesis-scanner
+StartupWMClass=NemesisScanner
 Categories=Utility;Network;Security;
 Terminal=false
 EOF
