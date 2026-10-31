@@ -1,0 +1,185 @@
+{
+  "target": "172.16.243.135",
+  "os": "FreeBSD 7.0-RELEASE-p1 - 10.0-CURRENT",
+  "timestamp": "2026-10-31T14:01:18.485329",
+  "services": [
+    "tcp/80 http VMware ESXi Server httpd",
+    "tcp/427 svrloc",
+    "tcp/443 https",
+    "tcp/902 vmware-auth VMware Authentication Daemon 1.10",
+    "tcp/8000 http-alt",
+    "tcp/8300 tmi",
+    "tcp/9080 glrpc"
+  ],
+  "modules": {
+    "Install & Update": [
+      "tcp/80 http VMware ESXi Server httpd",
+      "tcp/443 https"
+    ],
+    "HTTP(S) Exploitation": [
+      "tcp/80 http VMware ESXi Server httpd",
+      "tcp/443 https"
+    ]
+  },
+  "vulnerabilities": {
+    "tcp/80 http VMware ESXi Server httpd": [
+      {
+        "cve": "",
+        "description": "Script http-vuln-cve2013-7091: ERROR: Script execution failed (use -d to debug)",
+        "cvss_score": null,
+        "severity": "MEDIUM",
+        "exploit_available": false,
+        "exploitdb_url": "",
+        "exploits": []
+      },
+      {
+        "cve": "",
+        "description": "Missing HSTS header (Strict-Transport-Security)",
+        "cvss_score": null,
+        "severity": "MEDIUM",
+        "exploit_available": false,
+        "exploitdb_url": "",
+        "exploits": []
+      },
+      {
+        "cve": "",
+        "description": "Missing X-Frame-Options header",
+        "cvss_score": null,
+        "severity": "MEDIUM",
+        "exploit_available": false,
+        "exploitdb_url": "",
+        "exploits": []
+      },
+      {
+        "cve": "",
+        "description": "Missing X-Content-Type-Options header",
+        "cvss_score": null,
+        "severity": "MEDIUM",
+        "exploit_available": false,
+        "exploitdb_url": "",
+        "exploits": []
+      },
+      {
+        "cve": "",
+        "description": "Missing Content-Security-Policy header",
+        "cvss_score": null,
+        "severity": "MEDIUM",
+        "exploit_available": false,
+        "exploitdb_url": "",
+        "exploits": []
+      },
+      {
+        "cve": "",
+        "description": "Missing X-XSS-Protection header",
+        "cvss_score": null,
+        "severity": "MEDIUM",
+        "exploit_available": false,
+        "exploitdb_url": "",
+        "exploits": []
+      }
+    ],
+    "tcp/8000 http-alt": [
+      {
+        "cve": "",
+        "description": "Script http-vuln-cve2014-3704: ERROR: Script execution failed (use -d to debug)",
+        "cvss_score": null,
+        "severity": "MEDIUM",
+        "exploit_available": false,
+        "exploitdb_url": "",
+        "exploits": []
+      }
+    ]
+  },
+  "raw_services": [
+    {
+      "port": 80,
+      "proto": "tcp",
+      "name": "http",
+      "product": "VMware ESXi Server httpd",
+      "version": "",
+      "extrainfo": "",
+      "script": {
+        "http-vuln-cve2013-7091": "ERROR: Script execution failed (use -d to debug)",
+        "http-passwd": "ERROR: Script execution failed (use -d to debug)",
+        "http-csrf": "Couldn't find any CSRF vulnerabilities.",
+        "http-dombased-xss": "Couldn't find any DOM based XSS.",
+        "http-litespeed-sourcecode-download": "ERROR: Script execution failed (use -d to debug)",
+        "http-stored-xss": "Couldn't find any stored XSS vulnerabilities."
+      }
+    },
+    {
+      "port": 427,
+      "proto": "tcp",
+      "name": "svrloc",
+      "product": "",
+      "version": "",
+      "extrainfo": "",
+      "script": {}
+    },
+    {
+      "port": 443,
+      "proto": "tcp",
+      "name": "https",
+      "product": "",
+      "version": "",
+      "extrainfo": "",
+      "script": {
+        "ssl-enum-ciphers": "\n  TLSv1.2: \n    ciphers: \n      TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 (secp256r1) - A\n      TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 (secp256r1) - A\n      TLS_RSA_WITH_AES_256_GCM_SHA384 (rsa 2048) - A\n      TLS_RSA_WITH_AES_128_GCM_SHA256 (rsa 2048) - A\n      TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384 (secp256r1) - A\n      TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA (secp256r1) - A\n      TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256 (secp256r1) - A\n      TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA (secp256r1) - A\n      TLS_RSA_WITH_AES_256_CBC_SHA256 (rsa 2048) - A\n      TLS_RSA_WITH_AES_256_CBC_SHA (rsa 2048) - A\n      TLS_RSA_WITH_AES_128_CBC_SHA256 (rsa 2048) - A\n      TLS_RSA_WITH_AES_128_CBC_SHA (rsa 2048) - A\n    compressors: \n      NULL\n    cipher preference: server\n  least strength: A",
+        "http-csrf": "Couldn't find any CSRF vulnerabilities.",
+        "http-dombased-xss": "Couldn't find any DOM based XSS.",
+        "http-stored-xss": "Couldn't find any stored XSS vulnerabilities.",
+        "ssl-date": "TLS randomness does not represent time",
+        "http-enum": "\n  /cgi-bin/mj_wwwusr: Majordomo2 Mailing List\n  /cgi-bin/vcs: Mitel Audio and Web Conferencing (AWC)\n  /cgi-bin/ffileman.cgi?: Ffileman Web File Manager\n  /cgi-bin/ck/mimencode: ContentKeeper Web Appliance\n  /cgi-bin/masterCGI?: Alcatel-Lucent OmniPCX Enterprise\n  /cgi-bin/awstats.pl: AWStats\n  /ui/: VMWare\n  /cgi-bin/image/shikaku2.png: TeraStation PRO RAID 0/1/5 Network Attached Storage\n  /cgi-bin/export_debug_msg.exp: Cisco RV320/RV325 Unauthenticated Diagnostic Data & Configuration Export (CVE-2019-1653)\n  /cgi-bin/config.exp: Cisco RV320/RV325 Unauthenticated Diagnostic Data & Configuration Export (CVE-2019-1653)\n  /cgi-bin/: Potentially interesting folder\n  /host/: Potentially interesting folder\n",
+        "fingerprint-strings": "\n  FourOhFourRequest: \n    HTTP/1.1 404 Not Found\n    Date: Sat, 31 Oct 2026 10:28:30 GMT\n    Connection: close\n    Content-Security-Policy: upgrade-insecure-requests\n    Content-Type: text/plain; charset=utf-8\n    Strict-Transport-Security: max-age=31536000\n    X-Content-Type-Options: nosniff\n    X-Frame-Options: DENY\n    X-XSS-Protection: 1\n    Content-Length: 0\n  GetRequest: \n    HTTP/1.1 200 OK\n    Date: Sat, 31 Oct 2026 10:28:30 GMT\n    Connection: close\n    Content-Security-Policy: upgrade-insecure-requests\n    Content-Type: text/html\n    Strict-Transport-Security: max-age=31536000\n    X-Content-Type-Options: nosniff\n    X-Frame-Options: DENY\n    X-XSS-Protection: 1\n    Content-Length: 258\n    <!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n    <html lang=\"en\">\n    <head>\n    <meta http-equiv=\"content-type\" content=\"text/html; charset=utf8\">\n    <meta http-equiv=\"refresh\" content=\"0;URL='/ui'\"/>\n    </head>\n    </html>\n  HTTPOptions: \n    HTTP/1.1 501 Not Implemented\n    Date: Sat, 31 Oct 2026 10:28:30 GMT\n    Connection: close\n    Content-Security-Policy: upgrade-insecure-requests\n    Content-Type: text/plain; charset=utf-8\n    Strict-Transport-Security: max-age=31536000\n    X-Content-Type-Options: nosniff\n    X-Frame-Options: DENY\n    X-XSS-Protection: 1\n    Content-Length: 0\n  RTSPRequest: \n    HTTP/1.1 400 Bad Request\n    Date: Sat, 31 Oct 2026 10:28:40 GMT\n    Connection: close\n    Content-Type: text/html\n    Content-Length: 50\n    <HTML><BODY><H1>400 Bad Request</H1></BODY></HTML>\n  SIPOptions: \n    HTTP/1.1 400 Bad Request\n    Date: Sat, 31 Oct 2026 10:29:23 GMT\n    Connection: close\n    Content-Type: text/html\n    Content-Length: 50\n    <HTML><BODY><H1>400 Bad Request</H1></BODY></HTML>",
+        "http-majordomo2-dir-traversal": "ERROR: Script execution failed (use -d to debug)",
+        "ssl-cert": "Subject: commonName=localhost.localdomain/organizationName=VMware, Inc/stateOrProvinceName=California/countryName=US\nSubject Alternative Name: DNS:localhost.localdomain\nIssuer: organizationName=VMware Installer\nPublic Key type: rsa\nPublic Key bits: 2048\nSignature Algorithm: sha256WithRSAEncryption\nNot valid before: 2026-10-27T19:59:38\nNot valid after:  2038-04-27T19:59:38\nMD5:   a907 56e9 d731 e77f ca88 2819 d0fb d4ce\nSHA-1: b8d7 0b5f 62aa 220b 882a f69c 7891 a263 9ba1 8be7"
+      }
+    },
+    {
+      "port": 902,
+      "proto": "tcp",
+      "name": "vmware-auth",
+      "product": "VMware Authentication Daemon",
+      "version": "1.10",
+      "extrainfo": "Uses VNC, SOAP",
+      "script": {
+        "ssl-ccs-injection": "No reply from server (TIMEOUT)"
+      }
+    },
+    {
+      "port": 8000,
+      "proto": "tcp",
+      "name": "http-alt",
+      "product": "",
+      "version": "",
+      "extrainfo": "",
+      "script": {
+        "http-aspnet-debug": "ERROR: Script execution failed (use -d to debug)",
+        "http-vuln-cve2014-3704": "ERROR: Script execution failed (use -d to debug)"
+      }
+    },
+    {
+      "port": 8300,
+      "proto": "tcp",
+      "name": "tmi",
+      "product": "",
+      "version": "",
+      "extrainfo": "",
+      "script": {}
+    },
+    {
+      "port": 9080,
+      "proto": "tcp",
+      "name": "glrpc",
+      "product": "",
+      "version": "",
+      "extrainfo": "",
+      "script": {
+        "ssl-enum-ciphers": "\n  TLSv1.2: \n    ciphers: \n      TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA (secp256r1) - A\n      TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384 (secp256r1) - A\n      TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 (secp256r1) - A\n      TLS_RSA_WITH_AES_128_CBC_SHA (rsa 2048) - A\n      TLS_RSA_WITH_AES_128_CBC_SHA256 (rsa 2048) - A\n      TLS_RSA_WITH_AES_128_GCM_SHA256 (rsa 2048) - A\n      TLS_RSA_WITH_AES_256_CBC_SHA (rsa 2048) - A\n      TLS_RSA_WITH_AES_256_CBC_SHA256 (rsa 2048) - A\n      TLS_RSA_WITH_AES_256_GCM_SHA384 (rsa 2048) - A\n    compressors: \n      NULL\n    cipher preference: client\n  least strength: A",
+        "ssl-date": "TLS randomness does not represent time",
+        "fingerprint-strings": "\n  GetRequest: \n    HTTP/1.1 200 OK\n    Server: \n    X-Frame-Options: SAMEORIGIN\n    Content-Type: text/xml\n    Content-Length: 0\n    Connection: close\n  HTTPOptions: \n    HTTP/1.1 200 OK\n    Server: \n    X-Frame-Options: SAMEORIGIN\n    Content-Type: text/xml; charset=utf-8\n    Content-Length: 0\n    Connection: close\n  RPCCheck, SMBProgNeg: \n    HTTP/1.1 400 Bad Request\n    Server: \n    X-Frame-Options: SAMEORIGIN\n    Content-Type: application/soap+xml; charset=utf-8\n    Content-Length: 1615\n    Connection: close\n    <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n    <SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:SOAP-ENC=\"http://www.w3.org/2003/05/soap-encoding\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:ns1=\"http://vasa.vim.vmware.com/xsd\" xmlns:placementPolicy=\"http://placement.policy.data.vasa.vim.vmware.com/xsd\" xmlns:fault=\"http://fault.vasa.vim.vmware.com/xsd\" xmlns:capability=\"http://capability.policy.data.vasa.vim.vmware.com/xsd\" xmlns:profile=\"http://profile.policy.data.vasa.vim.vmware.com/xsd\" xmlns:ns3=\"http://annotation.vasa.vim.vmware.com/xsd\" xmlns:policy=\"http://policy.data.vasa.vim.vmware.com/xsd\" xmlns:providerCapability=\"http://provider.capab",
+        "ssl-cert": "Subject: commonName=localhost.localdomain/organizationName=VMware, Inc/stateOrProvinceName=California/countryName=US\nSubject Alternative Name: DNS:localhost.localdomain\nIssuer: organizationName=VMware Installer\nPublic Key type: rsa\nPublic Key bits: 2048\nSignature Algorithm: sha256WithRSAEncryption\nNot valid before: 2026-10-27T19:59:38\nNot valid after:  2038-04-27T19:59:38\nMD5:   a907 56e9 d731 e77f ca88 2819 d0fb d4ce\nSHA-1: b8d7 0b5f 62aa 220b 882a f69c 7891 a263 9ba1 8be7"
+      }
+    }
+  ]
+}

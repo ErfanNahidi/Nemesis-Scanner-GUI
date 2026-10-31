@@ -13,7 +13,10 @@ Install the system Nmap binary and the Python dependencies, then run from this d
 ```bash
 python -m pip install -r requirements.txt
 python main.py
-```
+````
+
+Run both commands with the same Python environment that installed the dependencies. Do not use
+`sudo python main.py`; it can select a different system Python with missing packages.
 
 Tkinter is included with most Python desktop distributions. Linux distributions may package it
 separately as `python3-tk`.

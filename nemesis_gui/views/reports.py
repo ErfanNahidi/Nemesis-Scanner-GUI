@@ -15,8 +15,8 @@ class ReportsPage(ttk.Frame):
         self.rowconfigure(1, weight=1)
         header = ttk.Frame(self)
         header.grid(row=0, column=0, sticky="ew", pady=(0, 19))
-        ttk.Label(header, text="Report library", style="Title.TLabel").pack(anchor="w")
-        ttk.Label(header, text="Browse and export saved assessment results.", style="Subtitle.TLabel").pack(anchor="w", pady=(5, 0))
+        ttk.Label(header, text="Scan reports", style="Title.TLabel").pack(anchor="w")
+        ttk.Label(header, text="Review and export stored host scan reports.", style="Subtitle.TLabel").pack(anchor="w", pady=(5, 0))
 
         body = ttk.Frame(self)
         body.grid(row=1, column=0, sticky="nsew")
@@ -27,7 +27,7 @@ class ReportsPage(ttk.Frame):
         list_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
         detail_panel = ttk.Frame(body, style="Panel.TFrame", padding=17)
         detail_panel.grid(row=0, column=1, sticky="nsew", padx=(8, 0))
-        ttk.Label(list_panel, text="SAVED REPORTS", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).pack(anchor="w", pady=(0, 10))
+        ttk.Label(list_panel, text="REPORT ARCHIVE", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).pack(anchor="w", pady=(0, 10))
         self.tree = ttk.Treeview(list_panel, columns=("target", "date"), show="headings", height=14)
         self.tree.heading("target", text="TARGET")
         self.tree.heading("date", text="DATE")
@@ -35,13 +35,13 @@ class ReportsPage(ttk.Frame):
         self.tree.column("date", width=130, anchor="w")
         self.tree.pack(fill="both", expand=True)
         self.tree.bind("<<TreeviewSelect>>", self._select_report)
-        ttk.Button(list_panel, text="Export selected report", style="Secondary.TButton", command=self._export).pack(anchor="w", pady=(12, 0))
+        ttk.Button(list_panel, text="Export report...", style="Secondary.TButton", command=self._export).pack(anchor="w", pady=(12, 0))
 
         detail_panel.columnconfigure(0, weight=1)
         detail_panel.rowconfigure(2, weight=1)
         self.detail_title = ttk.Label(detail_panel, text="Select a report", style="Panel.TLabel", font=("DejaVu Sans", 14, "bold"))
         self.detail_title.grid(row=0, column=0, sticky="w")
-        self.detail_subtitle = ttk.Label(detail_panel, text="Assessment details will appear here.", style="Muted.TLabel")
+        self.detail_subtitle = ttk.Label(detail_panel, text="Report metadata and findings are displayed here.", style="Muted.TLabel")
         self.detail_subtitle.grid(row=1, column=0, sticky="w", pady=(5, 12))
         self.detail_text = tk.Text(detail_panel, wrap="word", bg=COLORS["soft"], fg=COLORS["ink"], relief="flat", padx=12, pady=12, font=("DejaVu Sans", 9), state="disabled")
         self.detail_text.grid(row=2, column=0, sticky="nsew")
@@ -64,7 +64,7 @@ class ReportsPage(ttk.Frame):
         summary = summarize_report(report)
         self.detail_title.configure(text=report.get("target", "Unknown target"))
         self.detail_subtitle.configure(text=f"{report.get('os', 'Unknown OS')}    |    {report.get('timestamp', '')[:19].replace('T', ' ')}    |    {summary['services']} services    |    {summary['findings']} findings")
-        lines = ["OPEN SERVICES"]
+        lines = ["DETECTED SERVICES"]
         lines.extend(f"  {service}" for service in report.get("services", []))
         lines.extend(("", "VULNERABILITY FINDINGS"))
         vulnerabilities = report.get("vulnerabilities", {})
@@ -85,7 +85,7 @@ class ReportsPage(ttk.Frame):
 
     def _export(self):
         if not self.selected_path:
-            messagebox.showinfo("Export report", "Select a report first.", parent=self)
+            messagebox.showinfo("Export report", "Select a report to export.", parent=self)
             return
         destination = filedialog.asksaveasfilename(
             parent=self,
