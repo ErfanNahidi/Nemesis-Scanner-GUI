@@ -18,3 +18,5 @@ venv/
 *.code-workspace
 .DS_Store
 Thumbs.db
+d
+.gitignore
