@@ -15,16 +15,16 @@ class DashboardPage(ttk.Frame):
     def _build(self):
         header = ttk.Frame(self)
         header.pack(fill="x", pady=(0, 24))
-        ttk.Label(header, text="Dashboard", style="Title.TLabel").pack(anchor="w")
-        ttk.Label(header, text="Summary of saved scan reports and detected network services.", style="Subtitle.TLabel").pack(anchor="w", pady=(5, 0))
+        ttk.Label(header, text="Home", style="Title.TLabel").pack(anchor="w")
+        ttk.Label(header, text="Recent results and saved reports.", style="Subtitle.TLabel").pack(anchor="w", pady=(5, 0))
 
         hero = tk.Frame(self, bg=COLORS["green_dark"], padx=30, pady=28, highlightthickness=1, highlightbackground="#182D4C")
         hero.pack(fill="x", pady=(0, 20))
         hero.columnconfigure(0, weight=1)
         tk.Label(hero, text="NETWORK SCANNER", bg=COLORS["green_dark"], fg=COLORS["lime"], font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, sticky="w")
-        tk.Label(hero, text="Host and service assessment", bg=COLORS["green_dark"], fg="#FFFFFF", font=("DejaVu Sans", 20, "bold"), justify="left").grid(row=1, column=0, sticky="w", pady=(9, 6))
-        tk.Label(hero, text="Identify open ports, service versions, and vulnerability findings.", bg=COLORS["green_dark"], fg="#B7C7DC", font=("DejaVu Sans", 10)).grid(row=2, column=0, sticky="w")
-        ttk.Button(hero, text="Configure scan", style="Primary.TButton", command=lambda: self.app.show_page("scan")).grid(row=1, column=1, rowspan=2, padx=(25, 0), sticky="e")
+        tk.Label(hero, text="Check one host", bg=COLORS["green_dark"], fg="#FFFFFF", font=("DejaVu Sans", 20, "bold"), justify="left").grid(row=1, column=0, sticky="w", pady=(9, 6))
+        tk.Label(hero, text="View open ports, services, and optional security findings.", bg=COLORS["green_dark"], fg="#B7C7DC", font=("DejaVu Sans", 10)).grid(row=2, column=0, sticky="w")
+        ttk.Button(hero, text="Start a scan", style="Primary.TButton", command=lambda: self.app.show_page("scan")).grid(row=1, column=1, rowspan=2, padx=(25, 0), sticky="e")
 
         metrics = ttk.Frame(self)
         metrics.pack(fill="x", pady=(0, 18))

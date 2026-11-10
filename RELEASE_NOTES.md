@@ -1,3 +1,28 @@
+# Nemesis Scanner GUI 1.3.0
+
+## What's changed
+
+- Added Windows and Linux GitHub Actions builds for every push and pull request.
+- Added version-tagged GitHub Releases containing the Windows EXE and ZIP, Linux DEB, RPM,
+  Arch package, and AppImage. The release tag must match the application version.
+- Added an **Install new update** action for supported Windows and Linux installations.
+- Simplified scan navigation and added assessment presets with clearer descriptions.
+- Added real scan-stage status and elapsed time to the scan page.
+
+## Build and release
+
+Pushes and pull requests build platform artifacts and keep them as workflow artifacts for 14 days.
+To publish a release, set `nemesis_gui.__version__`, commit the changes, and push a matching tag,
+for example `v1.3.0`. GitHub creates the release only after both platform builds succeed.
+
+Windows automatic replacement requires the portable EXE to be in a folder writable by the current
+user. Linux package installs require desktop authorization; AppImage updates require a writable
+AppImage directory. macOS builds are not published.
+
+## Previous release
+
+The 1.2.2 patch below fixed Linux window identity and icon setup.
+
 # Nemesis Scanner GUI 1.2.2
 
 This patch fixes the Linux window identity and icon setup so Fedora's desktop taskbar can display

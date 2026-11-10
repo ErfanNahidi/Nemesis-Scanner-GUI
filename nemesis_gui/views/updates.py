@@ -1,4 +1,6 @@
 import queue
+import shutil
+import subprocess
 import threading
 import tkinter as tk
 import webbrowser
@@ -8,6 +10,8 @@ from .. import __version__
 from ..services.updater import (
     download_release_asset,
     fetch_latest_release,
+    install_downloaded_update,
+    is_installable_asset,
     recommended_asset_name,
     reveal_in_file_manager,
     version_tuple,
@@ -19,8 +23,10 @@ class UpdatesPage(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.release = None
+        self.available_assets = []
         self.selected_asset = None
         self.downloaded_path = None
+        self.downloaded_asset = None
         self.events = queue.Queue()
         self.columnconfigure(0, weight=1)
         self._build()
@@ -89,9 +95,14 @@ class UpdatesPage(ttk.Frame):
         self.check_button.pack(side="left")
         self.download_button = ttk.Button(actions, text="Download update", style="Secondary.TButton", command=self._download, state="disabled")
         self.download_button.pack(side="left", padx=(9, 0))
-        self.release_button = ttk.Button(actions, text="Release details", style="Secondary.TButton", command=self._open_release, state="disabled")
-        self.release_button.pack(side="left", padx=(9, 0))
-        self.folder_button = ttk.Button(actions, text="Show downloaded file", style="Secondary.TButton", command=self._reveal_download, state="disabled")
+        self.install_button = ttk.Button(actions, text="Install new update", style="Primary.TButton", command=self._install_update, state="disabled")
+        self.install_button.pack(side="left", padx=(9, 0))
+
+        secondary_actions = ttk.Frame(controls, style="Panel.TFrame")
+        secondary_actions.grid(row=3, column=0, sticky="w", pady=(10, 0))
+        self.release_button = ttk.Button(secondary_actions, text="Release details", style="Secondary.TButton", command=self._open_release, state="disabled")
+        self.release_button.pack(side="left")
+        self.folder_button = ttk.Button(secondary_actions, text="Show downloaded file", style="Secondary.TButton", command=self._reveal_download, state="disabled")
         self.folder_button.pack(side="left", padx=(9, 0))
 
         self.progress = ttk.Progressbar(self, mode="determinate", maximum=100)
@@ -126,9 +137,37 @@ class UpdatesPage(ttk.Frame):
     def _download_worker(self, asset):
         try:
             path = download_release_asset(asset, lambda received, total: self.events.put(("progress", received, total)))
-            self.events.put(("download_done", path))
+            self.events.put(("download_done", path, asset))
         except Exception as error:
             self.events.put(("error", f"Download failed: {error}"))
+
+    def _install_update(self):
+        if not self.downloaded_path:
+            return
+        self._set_busy(True, "Installing update. Approve the system prompt if it appears…")
+        threading.Thread(target=self._install_worker, args=(self.downloaded_path,), daemon=True).start()
+
+    def _install_worker(self, downloaded_path):
+        try:
+            result = install_downloaded_update(downloaded_path)
+            if isinstance(result, subprocess.Popen):
+                output, _ = result.communicate()
+                if result.returncode != 0:
+                    detail = next((line.strip() for line in reversed((output or "").splitlines()) if line.strip()), "")
+                    message = "Installation was cancelled or failed. Check the system authorization prompt."
+                    if detail:
+                        message = f"{message} {detail}"
+                    raise RuntimeError(message)
+                launcher = shutil.which("nemesis-scanner-gui")
+                if launcher:
+                    subprocess.Popen([launcher])
+                    self.events.put(("restart",))
+                else:
+                    self.events.put(("install_done", "Update installed. Close and reopen Nemesis Scanner."))
+            else:
+                self.events.put(("restart",))
+        except Exception as error:
+            self.events.put(("error", f"Installation failed: {error}"))
 
     def _process_events(self):
         try:
@@ -145,10 +184,23 @@ class UpdatesPage(ttk.Frame):
                     else:
                         self.status_label.configure(text=f"Downloading update… {received / 1048576:.1f} MB")
                 elif kind == "download_done":
-                    self.downloaded_path = event[1]
+                    _, self.downloaded_path, self.downloaded_asset = event
                     self._set_busy(False, f"Update downloaded to {self.downloaded_path}")
                     self.folder_button.configure(state="normal")
                     self.progress.configure(value=100)
+                elif kind == "install_done":
+                    self._set_busy(False, event[1])
+                    self.install_button.configure(state="disabled")
+                elif kind == "restart":
+                    self.status_label.configure(text="Update installed. Restarting Nemesis Scanner…")
+                    self.check_button.configure(state="disabled")
+                    self.download_button.configure(state="disabled")
+                    self.install_button.configure(state="disabled")
+                    self.release_button.configure(state="disabled")
+                    self.folder_button.configure(state="disabled")
+                    self.progress.stop()
+                    self.progress.configure(mode="determinate", value=100)
+                    self.after(600, self.winfo_toplevel().destroy)
                 elif kind == "error":
                     self._set_busy(False, event[1])
                     if self.release and self.selected_asset:
@@ -173,18 +225,21 @@ class UpdatesPage(ttk.Frame):
         self.status_label.configure(text=message)
 
         assets = release.get("assets", [])
-        names = [asset["name"] for asset in assets]
+        self.available_assets = [asset for asset in assets if is_installable_asset(asset["name"])]
+        names = [asset["name"] for asset in self.available_assets]
         self.asset_box.configure(values=names)
-        recommended = recommended_asset_name(assets)
+        recommended = recommended_asset_name(self.available_assets)
         if recommended:
             self.asset_box.set(recommended)
-            self.selected_asset = next(asset for asset in assets if asset["name"] == recommended)
+            self.selected_asset = next(asset for asset in self.available_assets if asset["name"] == recommended)
         elif names:
             self.asset_box.set(names[0])
-            self.selected_asset = assets[0]
+            self.selected_asset = self.available_assets[0]
         else:
-            self.asset_box.set("No downloadable files were attached to this release")
+            self.asset_box.set("No installer is available for this operating system")
             self.selected_asset = None
+            if latest_tuple > current_tuple:
+                message = f"Version {latest} is available, but no automatic installer is published for this system."
 
         notes = (release.get("body") or "No release notes were provided.").strip()
         if len(notes) > 1400:
@@ -198,7 +253,7 @@ class UpdatesPage(ttk.Frame):
     def _asset_selected(self, _event=None):
         if self.release:
             name = self.asset_box.get()
-            self.selected_asset = next((asset for asset in self.release["assets"] if asset["name"] == name), None)
+            self.selected_asset = next((asset for asset in self.available_assets if asset["name"] == name), None)
             can_download = bool(self.selected_asset and version_tuple(self.release["version"]) > version_tuple(__version__))
             self.download_button.configure(state="normal" if can_download else "disabled")
 
@@ -218,8 +273,13 @@ class UpdatesPage(ttk.Frame):
         self.check_button.configure(state="disabled" if busy else "normal")
         if busy:
             self.download_button.configure(state="disabled")
+            self.install_button.configure(state="disabled")
+            self.folder_button.configure(state="disabled")
             self.progress.configure(mode="indeterminate")
             self.progress.start(12)
         else:
             self.progress.stop()
             self.progress.configure(mode="determinate")
+            can_install = bool(self.downloaded_path and is_installable_asset(self.downloaded_path.name))
+            self.install_button.configure(state="normal" if can_install else "disabled")
+            self.folder_button.configure(state="normal" if self.downloaded_path else "disabled")

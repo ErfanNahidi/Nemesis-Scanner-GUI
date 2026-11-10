@@ -78,14 +78,14 @@ class NemesisApp(tk.Tk):
         tk.Label(brand_copy, text="NEMESIS", bg=COLORS["green_dark"], fg="#FFFFFF", font=("DejaVu Sans", 13, "bold")).pack(anchor="w")
         tk.Label(brand_copy, text=f"SCANNER  /  GUI {__version__}", bg=COLORS["green_dark"], fg="#A5B6CE", font=("DejaVu Sans", 7, "bold")).pack(anchor="w", pady=(3, 0))
 
-        tk.Label(sidebar, text="WORKSPACE", bg=COLORS["green_dark"], fg="#8798B1", font=("DejaVu Sans", 8, "bold")).pack(anchor="w", pady=(0, 10))
+        tk.Label(sidebar, text="MENU", bg=COLORS["green_dark"], fg="#8798B1", font=("DejaVu Sans", 8, "bold")).pack(anchor="w", pady=(0, 10))
         self.nav_buttons = {}
         self.nav_rows = {}
         for key, label in (
-            ("dashboard", "Dashboard"),
-            ("scan", "Network scan"),
-            ("reports", "Scan reports"),
-            ("updates", "Updates"),
+            ("dashboard", "Home"),
+            ("scan", "Start a scan"),
+            ("reports", "Reports"),
+            ("updates", "About & updates"),
         ):
             row = tk.Frame(sidebar, bg=COLORS["green_dark"])
             row.pack(fill="x", pady=2)
@@ -150,10 +150,10 @@ class NemesisApp(tk.Tk):
         self.current_page.tkraise()
         self.page_title.configure(
             text={
-                "dashboard": "Dashboard",
-                "scan": "Network scan",
-                "reports": "Scan reports",
-                "updates": "Updates",
+                "dashboard": "Home",
+                "scan": "Start a scan",
+                "reports": "Reports",
+                "updates": "About & updates",
             }[name]
         )
         for key, button in self.nav_buttons.items():

@@ -1,5 +1,6 @@
 import os
 import platform
+import time
 import tkinter as tk
 from tkinter import ttk
 
@@ -13,8 +14,11 @@ class ScanPage(ttk.Frame):
         self.app = app
         self.worker = None
         self._render_generation = 0
+        self.scan_started_at = None
+        self._elapsed_displayed = None
         self.target_var = tk.StringVar()
         self.profile_var = tk.StringVar(value="Quick")
+        self.assessment_preset_var = tk.StringVar(value="Custom settings")
         self.source_var = tk.StringVar(value="Local database")
         self.nvd_key_var = tk.StringVar(value=os.environ.get("NVD_API_KEY", ""))
         self.vulners_key_var = tk.StringVar(value=os.environ.get("VULNERS_API_KEY", ""))
@@ -23,11 +27,18 @@ class ScanPage(ttk.Frame):
         self.elevate_var = tk.BooleanVar(value=False)
         self.authorized_var = tk.BooleanVar(value=False)
         self.profile_hint = tk.StringVar()
+        self.assessment_preset_hint = tk.StringVar()
+        self._applying_assessment_preset = False
+        self.more_options_expanded = False
         self.columnconfigure(0, weight=1)
-        self.rowconfigure(2, weight=1, minsize=360)
+        self.rowconfigure(2, weight=1, minsize=240)
         self._build()
         self.profile_var.trace_add("write", self._update_profile_hint)
+        self.profile_var.trace_add("write", self._mark_assessment_preset_custom)
         self.vuln_var.trace_add("write", self._update_source_state)
+        self.vuln_var.trace_add("write", self._mark_assessment_preset_custom)
+        self.deep_var.trace_add("write", self._mark_assessment_preset_custom)
+        self.assessment_preset_var.trace_add("write", self._apply_assessment_preset)
         self.source_var.trace_add("write", self._update_source_state)
         self.target_var.trace_add("write", self._update_button)
         self.after(120, self._drain_events)
@@ -35,60 +46,95 @@ class ScanPage(ttk.Frame):
     def _build(self):
         header = ttk.Frame(self)
         header.grid(row=0, column=0, sticky="ew", pady=(0, 6))
-        ttk.Label(header, text="Network scan", style="Title.TLabel").pack(anchor="w")
-        ttk.Label(header, text="Host, port, service, and vulnerability assessment.", style="Subtitle.TLabel").pack(anchor="w", pady=(2, 0))
+        ttk.Label(header, text="Scan a host", style="Title.TLabel").pack(anchor="w")
+        ttk.Label(header, text="Network discovery and vulnerability assessment.", style="Subtitle.TLabel").pack(anchor="w", pady=(2, 0))
 
         form = ttk.Frame(self, style="Panel.TFrame", padding=10)
         form.grid(row=1, column=0, sticky="ew", pady=(0, 7))
         form.columnconfigure(0, weight=3)
         form.columnconfigure(1, weight=2)
-        ttk.Label(form, text="TARGET HOST / IP", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, sticky="w")
-        ttk.Label(form, text="PORT SCAN PROFILE", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=1, sticky="w", padx=(14, 0))
+        ttk.Label(form, text="HOST OR IP ADDRESS", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, columnspan=2, sticky="w")
         self.target_entry = ttk.Entry(form, textvariable=self.target_var)
-        self.target_entry.grid(row=1, column=0, sticky="ew", pady=(5, 8))
+        self.target_entry.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(5, 8))
         self.target_entry.bind("<Return>", lambda _event: self._start_scan())
-        self.profile_combo = ttk.Combobox(form, textvariable=self.profile_var, values=("Quick", "Common", "Full TCP"), state="readonly", width=17)
-        self.profile_combo.grid(row=1, column=1, sticky="ew", padx=(14, 0), pady=(5, 8))
-        ttk.Label(form, textvariable=self.profile_hint, style="Muted.TLabel").grid(row=2, column=1, sticky="w", padx=(14, 0), pady=(0, 4))
 
-        options = ttk.Frame(form, style="Panel.TFrame")
-        options.grid(row=2, column=0, sticky="ew")
-        options.columnconfigure(0, weight=1)
-        ttk.Checkbutton(options, text="Run Nmap vulnerability scripts", variable=self.vuln_var).grid(row=0, column=0, sticky="w", pady=4)
-        ttk.Checkbutton(options, text="Enable active service checks", variable=self.deep_var).grid(row=1, column=0, sticky="w", pady=4)
-        self.elevate_check = ttk.Checkbutton(
-            options,
-            text="Request administrator access for Nmap (Linux)",
-            variable=self.elevate_var,
+        self.workflow_tabs = ttk.Notebook(form)
+        self.workflow_tabs.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 8))
+        network_tab = ttk.Frame(self.workflow_tabs, style="Panel.TFrame", padding=(8, 8, 8, 5))
+        network_tab.columnconfigure(0, weight=1)
+        ttk.Label(network_tab, text="SCAN COVERAGE", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, sticky="w")
+        self.profile_combo = ttk.Combobox(network_tab, textvariable=self.profile_var, values=("Quick", "Standard", "All TCP ports"), state="readonly", width=22)
+        self.profile_combo.grid(row=1, column=0, sticky="ew", pady=(5, 4))
+        ttk.Label(network_tab, textvariable=self.profile_hint, style="Muted.TLabel").grid(row=2, column=0, sticky="w")
+        self.workflow_tabs.add(network_tab, text="Network discovery")
+
+        vulnerability_tab = ttk.Frame(self.workflow_tabs, style="Panel.TFrame", padding=(8, 8, 8, 5))
+        vulnerability_tab.columnconfigure(0, weight=1)
+        ttk.Label(vulnerability_tab, text="ASSESSMENT TYPE", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, sticky="w")
+        self.assessment_preset_combo = ttk.Combobox(
+            vulnerability_tab,
+            textvariable=self.assessment_preset_var,
+            values=("Quick", "Medium", "Deep", "Web checks", "Full surface", "Custom settings"),
+            state="readonly",
+            width=22,
         )
-        self.elevate_check.grid(row=2, column=0, sticky="w", pady=4)
-        if platform.system() != "Linux":
-            self.elevate_check.configure(state="disabled")
-        ttk.Label(options, text="VULNERABILITY DATA SOURCE", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=1, sticky="e", padx=(10, 7))
-        self.source_combo = ttk.Combobox(options, textvariable=self.source_var, values=("Local database", "NVD online", "NVD + Vulners"), state="readonly", width=19)
-        self.source_combo.grid(row=1, column=1, sticky="e", padx=(10, 0), pady=4)
-
-        self.api_keys = ttk.Frame(form, style="Panel.TFrame")
-        self.api_keys.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(8, 0))
+        self.assessment_preset_combo.grid(row=1, column=0, sticky="ew", pady=(5, 4))
+        ttk.Label(vulnerability_tab, textvariable=self.assessment_preset_hint, style="Muted.TLabel").grid(row=2, column=0, sticky="w")
+        ttk.Label(vulnerability_tab, text="VULNERABILITY DATA", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=3, column=0, sticky="w", pady=(8, 0))
+        self.source_combo = ttk.Combobox(
+            vulnerability_tab,
+            textvariable=self.source_var,
+            values=("Local database", "NVD online", "NVD + Vulners"),
+            state="readonly",
+            width=28,
+        )
+        self.source_combo.grid(row=4, column=0, sticky="ew", pady=(5, 0))
+        self.api_keys = ttk.Frame(vulnerability_tab, style="Panel.TFrame")
+        self.api_keys.grid(row=5, column=0, sticky="ew", pady=(8, 0))
         self.api_keys.columnconfigure(0, weight=1)
         self.api_keys.columnconfigure(1, weight=1)
-        ttk.Label(self.api_keys, text="NVD API KEY (OPTIONAL)", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, sticky="w")
-        ttk.Label(self.api_keys, text="VULNERS API KEY (REQUIRED FOR VULNERS)", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=1, sticky="w", padx=(14, 0))
+        ttk.Label(self.api_keys, text="NVD key (optional)", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, sticky="w")
+        ttk.Label(self.api_keys, text="Vulners key (required for Vulners)", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=1, sticky="w", padx=(14, 0))
         self.nvd_key_entry = ttk.Entry(self.api_keys, textvariable=self.nvd_key_var, show="•")
         self.nvd_key_entry.grid(row=1, column=0, sticky="ew", pady=(6, 0))
         self.vulners_key_entry = ttk.Entry(self.api_keys, textvariable=self.vulners_key_var, show="•")
         self.vulners_key_entry.grid(row=1, column=1, sticky="ew", padx=(14, 0), pady=(6, 0))
+        self.workflow_tabs.add(vulnerability_tab, text="Vulnerability assessment")
+
+        self.more_options_button = ttk.Button(
+            form,
+            text="More options",
+            style="Secondary.TButton",
+            command=self._toggle_more_options,
+        )
+        self.more_options_button.grid(row=3, column=0, columnspan=2, sticky="w", pady=(0, 6))
+        options = ttk.Frame(form, style="Panel.TFrame")
+        self.options = options
+        options.grid(row=4, column=0, columnspan=2, sticky="ew")
+        options.columnconfigure(0, weight=1)
+        ttk.Label(options, text="ADDITIONAL CHECKS", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, sticky="w", pady=(0, 3))
+        ttk.Checkbutton(options, text="Run extra vulnerability checks", variable=self.vuln_var).grid(row=1, column=0, sticky="w", pady=4)
+        ttk.Checkbutton(options, text="Check discovered services for common issues", variable=self.deep_var).grid(row=2, column=0, sticky="w", pady=4)
+        self.elevate_check = ttk.Checkbutton(
+            options,
+            text="Allow administrator access for Nmap (Linux)",
+            variable=self.elevate_var,
+        )
+        self.elevate_check.grid(row=3, column=0, sticky="w", pady=4)
+        if platform.system() != "Linux":
+            self.elevate_check.configure(state="disabled")
+        options.grid_remove()
 
         consent = tk.Frame(form, bg=COLORS["soft"], padx=8, pady=5)
-        consent.grid(row=4, column=0, columnspan=2, sticky="ew", pady=(5, 5))
-        tk.Checkbutton(consent, text="I am authorized to assess this host.", variable=self.authorized_var, bg=COLORS["soft"], activebackground=COLORS["soft"], fg=COLORS["ink"], selectcolor=COLORS["mint"], font=("DejaVu Sans", 9, "bold"), command=self._update_button).pack(anchor="w")
+        consent.grid(row=5, column=0, columnspan=2, sticky="ew", pady=(5, 5))
+        tk.Checkbutton(consent, text="I have permission to scan this host.", variable=self.authorized_var, bg=COLORS["soft"], activebackground=COLORS["soft"], fg=COLORS["ink"], selectcolor=COLORS["mint"], font=("DejaVu Sans", 9, "bold"), command=self._update_button).pack(anchor="w")
 
         footer = ttk.Frame(form, style="Panel.TFrame")
-        footer.grid(row=5, column=0, columnspan=2, sticky="ew")
+        footer.grid(row=6, column=0, columnspan=2, sticky="ew")
         footer.columnconfigure(0, weight=1)
-        self.status_label = ttk.Label(footer, text="Awaiting scan configuration.", style="Muted.TLabel")
+        self.status_label = ttk.Label(footer, text="Ready to scan.", style="Muted.TLabel")
         self.status_label.grid(row=0, column=0, sticky="w")
-        self.scan_button = ttk.Button(footer, text="Run scan", style="Primary.TButton", command=self._start_scan)
+        self.scan_button = ttk.Button(footer, text="Start scan", style="Primary.TButton", command=self._start_scan)
         self.scan_button.grid(row=0, column=1, sticky="e")
         self.cancel_button = ttk.Button(footer, text="Cancel scan", command=self._cancel_scan)
         self.cancel_button.grid(row=0, column=2, sticky="e", padx=(8, 0))
@@ -103,8 +149,10 @@ class ScanPage(ttk.Frame):
         title_row.grid(row=0, column=0, sticky="ew")
         title_row.columnconfigure(0, weight=1)
         ttk.Label(title_row, text="Scan results", style="Panel.TLabel", font=("DejaVu Sans", 12, "bold")).grid(row=0, column=0, sticky="w")
+        self.elapsed_label = ttk.Label(title_row, text="", style="Muted.TLabel")
+        self.elapsed_label.grid(row=0, column=1, sticky="e", padx=(12, 0))
         self.result_summary = ttk.Label(title_row, text="No scan results", style="Muted.TLabel")
-        self.result_summary.grid(row=0, column=1, sticky="e")
+        self.result_summary.grid(row=0, column=2, sticky="e", padx=(12, 0))
         self.progress = ttk.Progressbar(result, mode="indeterminate", maximum=100)
         self.progress.grid(row=1, column=0, sticky="ew", pady=(13, 12))
         self.progress.grid_remove()
@@ -140,6 +188,7 @@ class ScanPage(ttk.Frame):
         self.finding_tree.tag_configure("MEDIUM", foreground=COLORS["gold"])
         self.finding_tree.tag_configure("LOW", foreground=COLORS["green"])
         self._update_profile_hint()
+        self._update_assessment_preset_hint()
         self._update_source_state()
 
     def set_target(self, target):
@@ -153,11 +202,57 @@ class ScanPage(ttk.Frame):
 
     def _update_profile_hint(self, *_args):
         descriptions = {
-            "Quick": "Common TCP/UDP and printer ports; optimized for short scans.",
-            "Common": "TCP ports 1-1000, printer port 9100, and common UDP ports.",
-            "Full TCP": "All TCP ports and commonly used UDP ports; longer runtime.",
+            "Quick": "Checks a short list of common ports.",
+            "Standard": "Checks common ports and identifies services; takes longer than Quick.",
+            "All TCP ports": "Checks every TCP port plus common UDP ports; can take much longer.",
         }
         self.profile_hint.set(descriptions.get(self.profile_var.get(), "Select a port scan profile."))
+
+    def _apply_assessment_preset(self, *_args):
+        presets = {
+            "Quick": ("Quick", True, False),
+            "Medium": ("Standard", True, False),
+            "Deep": ("Standard", True, True),
+            "Web checks": ("Quick", False, True),
+            "Full surface": ("All TCP ports", True, True),
+        }
+        preset = self.assessment_preset_var.get()
+        settings = presets.get(preset)
+        if settings:
+            self._applying_assessment_preset = True
+            try:
+                self.profile_var.set(settings[0])
+                self.vuln_var.set(settings[1])
+                self.deep_var.set(settings[2])
+            finally:
+                self._applying_assessment_preset = False
+        self._update_assessment_preset_hint()
+
+    def _mark_assessment_preset_custom(self, *_args):
+        if self._applying_assessment_preset:
+            return
+        if self.assessment_preset_var.get() != "Custom settings":
+            self.assessment_preset_var.set("Custom settings")
+
+    def _update_assessment_preset_hint(self):
+        descriptions = {
+            "Quick": "Quick ports with Nmap vulnerability scripts.",
+            "Medium": "Common ports with extra vulnerability checks.",
+            "Deep": "Common ports with extra checks; takes longer.",
+            "Web checks": "Quick ports with active service checks; Nmap scripts are off.",
+            "Full surface": "All TCP ports with extra checks; longest preset.",
+            "Custom settings": "Choose a scan size and optional checks yourself.",
+        }
+        self.assessment_preset_hint.set(descriptions.get(self.assessment_preset_var.get(), "Select an assessment preset."))
+
+    def _toggle_more_options(self):
+        self.more_options_expanded = not self.more_options_expanded
+        if self.more_options_expanded:
+            self.options.grid()
+            self.more_options_button.configure(text="Fewer options")
+        else:
+            self.options.grid_remove()
+            self.more_options_button.configure(text="More options")
 
     def _update_source_state(self, *_args):
         provider = self.source_var.get()
@@ -173,14 +268,14 @@ class ScanPage(ttk.Frame):
             return
         target = self.target_var.get().strip()
         if not validate_target(target):
-            self.status_label.configure(text="Enter one valid IP address or hostname.", foreground=COLORS["red"])
+            self.status_label.configure(text="Enter one IP address or host name.", foreground=COLORS["red"])
             self.target_entry.focus_set()
             return
         if not self.authorized_var.get():
-            self.status_label.configure(text="Confirm authorization before scanning this host.", foreground=COLORS["red"])
+            self.status_label.configure(text="Please confirm you have permission to scan this host.", foreground=COLORS["red"])
             return
 
-        mode = {"Quick": "quick", "Common": "common", "Full TCP": "full"}[self.profile_var.get()]
+        mode = {"Quick": "quick", "Standard": "common", "All TCP ports": "full"}[self.profile_var.get()]
         provider = self.source_var.get()
         if provider == "NVD + Vulners" and not self.vulners_key_var.get().strip():
             self.status_label.configure(text="Provide a Vulners API key or select NVD.", foreground=COLORS["red"])
@@ -206,6 +301,9 @@ class ScanPage(ttk.Frame):
         status = "Requesting administrator authorization..." if self.elevate_var.get() else f"Scanning target {target}..."
         self.status_label.configure(text=status, foreground=COLORS["green"])
         self.result_summary.configure(text=f"Data source: {provider}")
+        self.scan_started_at = time.monotonic()
+        self._elapsed_displayed = None
+        self._update_elapsed()
         self.worker.start()
 
     def _cancel_scan(self):
@@ -218,6 +316,7 @@ class ScanPage(ttk.Frame):
     def _drain_events(self):
         worker = self.worker
         if worker is not None:
+            self._update_elapsed()
             while not worker.events.empty():
                 event = worker.events.get()
                 if event[0] == "status":
@@ -257,6 +356,18 @@ class ScanPage(ttk.Frame):
                     self._update_button()
                     break
         self.after(120, self._drain_events)
+
+    def _update_elapsed(self):
+        if self.scan_started_at is None:
+            return
+        elapsed = int(time.monotonic() - self.scan_started_at)
+        if elapsed == self._elapsed_displayed:
+            return
+        self._elapsed_displayed = elapsed
+        hours, remainder = divmod(elapsed, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        duration = f"{hours:02d}:{minutes:02d}:{seconds:02d}" if hours else f"{minutes:02d}:{seconds:02d}"
+        self.elapsed_label.configure(text=f"Elapsed {duration}")
 
     def _show_report(self, report):
         self.service_tree.delete(*self.service_tree.get_children())

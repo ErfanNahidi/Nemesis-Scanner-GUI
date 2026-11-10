@@ -1,6 +1,6 @@
 # Nemesis Scanner GUI — User Manual
 
-Version 1.2.2
+Version 1.3.0
 
 This manual covers installation, the four application screens, scan settings, vulnerability data,
 reports, data storage, and common problems. The interface is currently in English.
@@ -71,11 +71,21 @@ Download the file for your operating system from the repository's [Releases page
 
 ### Check for updates in the application
 
-Open **Updates** in the sidebar and choose **Check for updates**. The application checks GitHub for
-the latest stable release, recommends a compatible installer for the current operating system,
-and can download the selected release asset into the user's Downloads folder. Use the system's
-normal package installer to complete a package update. The page displays release notes and credits
-the developer, **Erfan Nahidi**.
+Open **About & updates** in the sidebar and choose **Check for updates**. The application checks
+GitHub for the latest stable release and recommends an installer for the current system. Choose
+**Download update**, then **Install new update**.
+
+- **Windows portable EXE:** the updater waits for the application to close, replaces the EXE, and
+  starts the new version. Keep the EXE in a folder your account can modify; protected folders
+  require moving it before updating. Source runs do not support automatic Windows installation.
+- **Linux DEB, RPM, or Arch package:** the updater asks the desktop authorization service for
+  permission, then uses the system package manager. Approve the prompt to install. If `pkexec` or a
+  supported package manager is missing, install the downloaded package manually.
+- **Linux AppImage:** the updater replaces and reopens the AppImage that launched the current app.
+  The AppImage's folder must be writable.
+- **Other systems:** there is no automatic update until a release asset is published for that OS.
+
+The page also displays release notes and credits the developer, **Erfan Nahidi**.
 
 ### Windows
 
@@ -88,10 +98,10 @@ the developer, **Erfan Nahidi**.
 
 ### Debian or Ubuntu
 
-Open `nemesis-scanner-gui_1.2.2_all.deb` in the software installer, or run:
+Open `nemesis-scanner-gui_1.3.0_all.deb` in the software installer, or run:
 
 ```bash
-sudo apt install ./nemesis-scanner-gui_1.2.2_all.deb
+sudo apt install ./nemesis-scanner-gui_1.3.0_all.deb
 ```
 
 The package manager installs the declared dependencies. Start **Nemesis Scanner** from the
@@ -99,10 +109,10 @@ application menu or run `nemesis-scanner-gui`.
 
 ### Fedora-compatible Linux
 
-Open `nemesis-scanner-gui-1.2.2-1.x86_64.rpm` in Software, or run:
+Open `nemesis-scanner-gui-1.3.0-1.x86_64.rpm` in Software, or run:
 
 ```bash
-sudo dnf install ./nemesis-scanner-gui-1.2.2-1.x86_64.rpm
+sudo dnf install ./nemesis-scanner-gui-1.3.0-1.x86_64.rpm
 ```
 
 Start the application from the menu or run `nemesis-scanner-gui`.
@@ -112,7 +122,7 @@ Start the application from the menu or run `nemesis-scanner-gui`.
 Install the local package:
 
 ```bash
-sudo pacman -U ./nemesis-scanner-gui-1.2.2-1-any.pkg.tar.zst
+sudo pacman -U ./nemesis-scanner-gui-1.3.0-1-any.pkg.tar.zst
 ```
 
 Start it from the menu or run `nemesis-scanner-gui`. The release also includes `PKGBUILD` and a source
@@ -123,8 +133,8 @@ tarball for rebuilding with `makepkg`.
 Make the file executable, then launch it:
 
 ```bash
-chmod +x NemesisScanner-1.2.2-x86_64.AppImage
-./NemesisScanner-1.2.2-x86_64.AppImage
+chmod +x NemesisScanner-1.3.0-x86_64.AppImage
+./NemesisScanner-1.3.0-x86_64.AppImage
 ```
 
 Install Nmap separately. Depending on the Linux desktop, a compatible FUSE/AppImage runtime may
@@ -157,26 +167,49 @@ timestamp, operating-system estimate, detected services and vulnerability findin
 
 ## 6. Configure a scan
 
+The scan page has two tabs: **Network discovery** for choosing scan size and **Vulnerability
+assessment** for choosing a preset and data source. Less-used checks and Linux administrator access
+are under **More options**. The first tab is selected by default.
+
 ### Target
 
 Enter one IP address (IPv4 or IPv6) or a hostname, for example `192.0.2.10` or `server.example`.
 Whitespace, slash notation, ranges and multiple hosts are rejected. Use a hostname only when you
 intend to assess the host to which it resolves.
 
-### Port scan profile
+### Scan size
 
-| Profile | Ports and behavior | Typical use |
+| Choice | What it checks | Time |
 | --- | --- | --- |
-| **Quick** | A curated set of commonly used TCP and UDP ports, including common printer ports. It uses an aggressive timing template and a shorter host timeout. | Initial, short assessment. |
-| **Common** | TCP ports 1–1000 plus TCP 9100 and a curated set of common UDP ports. Identifies service versions and attempts OS detection. | Broader routine assessment. |
-| **Full TCP** | All TCP ports (1–65535) plus common UDP ports. Identifies service versions and attempts OS detection. | Thorough port coverage; can take substantially longer. |
+| **Quick** | A short list of common TCP and UDP ports. Extra checks are off by default. | Shortest. |
+| **Standard** | Common TCP and UDP ports. Identifies services and estimates the operating system. | Longer than Quick. |
+| **All TCP ports** | Every TCP port plus common UDP ports. Identifies services and estimates the operating system. | Can take much longer. |
 
-Timing depends on host response, filtering, retries, network conditions and enabled checks. Full
-TCP does not mean every UDP port; it scans the application's configured common UDP list.
+Timing depends on host response, filtering, network conditions and enabled checks. All TCP ports
+does not mean every UDP port; it scans the application's configured common UDP list.
+
+### Assessment presets
+
+The **Vulnerability assessment** tab provides presets that combine the supported port profile and
+checks:
+
+| Preset | Configuration |
+| --- | --- |
+| **Quick** | Quick ports with extra vulnerability checks. |
+| **Medium** | Common ports with extra vulnerability checks. |
+| **Deep** | Common ports with extra checks; takes longer. |
+| **Web checks** | Quick ports with active service checks; extra vulnerability checks are off. |
+| **Full surface** | All TCP ports with extra checks; longest preset. |
+| **Custom settings** | Choose a scan size and optional checks yourself. |
+
+The vulnerability data source is selected separately. Changing a profile or check after choosing a
+preset switches the selection to **Custom settings**. Less common controls are under **More
+options**. The GUI does not expose directory-focused Nmap arguments, arbitrary Nmap arguments, or
+custom port ranges.
 
 ### Nmap vulnerability scripts
 
-**Run Nmap vulnerability scripts** asks Nmap to run its NSE checks in addition to port/service
+**Run extra vulnerability checks** asks Nmap to run its NSE checks in addition to port/service
 discovery. The scripts make additional requests and can lengthen a scan. The selected script set
 depends on the profile. This option is independent of the vulnerability data source below: script
 results and database/provider matches are different kinds of evidence.
@@ -186,12 +219,15 @@ Windows EXE. Keep Nmap updated through the appropriate system installer or packa
 
 ### Active service checks
 
-**Enable active service checks** runs additional checks against some discovered TCP services. The
+**Check discovered services for common issues** runs additional checks against some discovered TCP services. The
 checks include basic FTP anonymous-login probing, selected HTTP security-header checks and TLS
 certificate/protocol checks. They do not cover every protocol or configuration. A missing finding
 does not establish that a service is secure.
 
 ### Vulnerability data source
+
+Choose the data source in the **Vulnerability assessment** tab. API key fields appear only when an
+online source is selected.
 
 | Source | What it does | Credentials/network |
 | --- | --- | --- |

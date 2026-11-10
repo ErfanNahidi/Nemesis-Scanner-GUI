@@ -270,6 +270,7 @@ class NemesisScanner:
         cve_lookup: Optional[bool] = None,
         elevate_nmap: bool = False,
         cancel_event=None,
+        status_callback=None,
     ):
         self.target = target
         self.threads = threads
@@ -294,6 +295,7 @@ class NemesisScanner:
         self.ipv6 = ipv6
         self.elevate_nmap = bool(elevate_nmap)
         self.cancel_event = cancel_event or threading.Event()
+        self.status_callback = status_callback
         self._process_lock = threading.Lock()
         self._nmap_process = None
 
@@ -789,14 +791,20 @@ class NemesisScanner:
 
     async def full_analysis(self):
         self._check_cancelled()
+        if self.status_callback:
+            self.status_callback("Running Nmap port and service discovery...")
         await self.run_scan_async()
         self._check_cancelled()
         if not self.scan_data:
             return None
         services = self.extract_services()
+        if self.status_callback:
+            self.status_callback(f"Correlating findings across {len(services)} discovered services...")
         vulns = await self.correlate_vulns(services)
         self._check_cancelled()
         modules = self.module_classification(services)
+        if self.status_callback:
+            self.status_callback("Preparing scan report...")
         return {
             "target": self.target,
             "os": self.os_info,

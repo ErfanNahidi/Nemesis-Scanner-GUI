@@ -124,6 +124,7 @@ class ScanWorker(threading.Thread):
                 cve_lookup=self.vuln_source == "online",
                 elevate_nmap=self.elevate_nmap,
                 cancel_event=self.cancel_event,
+                status_callback=lambda message: self.events.put(("status", message)),
             )
             self.scanner = scanner
             if self.cancel_event.is_set():
@@ -136,6 +137,7 @@ class ScanWorker(threading.Thread):
             if provider_warnings:
                 report["provider_warnings"] = list(dict.fromkeys(provider_warnings))
 
+            self.events.put(("status", "Saving scan report..."))
             REPORTS_DIR.mkdir(parents=True, exist_ok=True)
             if self.cancel_event.is_set():
                 raise InterruptedError("Scan cancelled by user.")

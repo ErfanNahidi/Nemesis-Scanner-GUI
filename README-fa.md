@@ -4,7 +4,7 @@ Nemesis Scanner یک برنامهٔ دسکتاپ برای ارزیابی یک م
 و سرویس‌ها را شناسایی می‌کند، یافته‌ها را با داده‌های آسیب‌پذیری محلی یا آنلاین تطبیق می‌دهد و
 نتیجهٔ هر اسکن کامل‌شده را به‌شکل گزارش JSON ذخیره می‌کند.
 
-نسخهٔ رابط گرافیکی **1.2.2** است؛ شمارهٔ نسخهٔ GUI از موتور اسکن مستقل است.
+نسخهٔ رابط گرافیکی **1.3.0** است؛ شمارهٔ نسخهٔ GUI از موتور اسکن مستقل است.
 
 ## دریافت و نصب
 
@@ -14,15 +14,23 @@ Nemesis Scanner یک برنامهٔ دسکتاپ برای ارزیابی یک م
 | سیستم‌عامل | فایل | نصب یا اجرا |
 | --- | --- | --- |
 | Windows x64 | `NemesisScanner.exe` | فایل را دانلود و باز کنید. برای اسکن، Nmap ویندوز را جداگانه نصب کنید. |
-| Fedora-compatible Linux x86_64 | `nemesis-scanner-gui-1.2.2-1.x86_64.rpm` | با Software باز کنید یا `sudo dnf install ./nemesis-scanner-gui-1.2.2-1.x86_64.rpm` را اجرا کنید. |
-| Debian یا Ubuntu | `nemesis-scanner-gui_1.2.2_all.deb` | با نصب‌کنندهٔ بسته باز کنید یا `sudo apt install ./nemesis-scanner-gui_1.2.2_all.deb` را اجرا کنید. |
-| Arch Linux | `nemesis-scanner-gui-1.2.2-1-any.pkg.tar.zst` | `sudo pacman -U ./nemesis-scanner-gui-1.2.2-1-any.pkg.tar.zst` را اجرا کنید. |
-| Linux قابل‌حمل x86_64 | `NemesisScanner-1.2.2-x86_64.AppImage` | مجوز اجرا بدهید و فایل را باز کنید. Nmap باید روی سیستم نصب باشد. |
+| Fedora-compatible Linux x86_64 | `nemesis-scanner-gui-1.3.0-1.x86_64.rpm` | با Software باز کنید یا `sudo dnf install ./nemesis-scanner-gui-1.3.0-1.x86_64.rpm` را اجرا کنید. |
+| Debian یا Ubuntu | `nemesis-scanner-gui_1.3.0_all.deb` | با نصب‌کنندهٔ بسته باز کنید یا `sudo apt install ./nemesis-scanner-gui_1.3.0_all.deb` را اجرا کنید. |
+| Arch Linux | `nemesis-scanner-gui-1.3.0-1-any.pkg.tar.zst` | `sudo pacman -U ./nemesis-scanner-gui-1.3.0-1-any.pkg.tar.zst` را اجرا کنید. |
+| Linux قابل‌حمل x86_64 | `NemesisScanner-1.3.0-x86_64.AppImage` | مجوز اجرا بدهید و فایل را باز کنید. Nmap باید روی سیستم نصب باشد. |
 
 بسته‌های DEB و Arch از Python و کتابخانه‌های همان توزیع استفاده می‌کنند؛ مدیر بسته وابستگی‌های
 اعلام‌شده را نصب می‌کند. فایل Windows، Python و کتابخانه‌های برنامه را در یک فایل همراه دارد و برای
 کاهش حجم، ماژول‌های اختیاری و استفاده‌نشده را حذف می‌کند. Nmap یک برنامهٔ
 سیستمی جداگانه است و برای اسکن در همهٔ سیستم‌عامل‌ها لازم است.
+
+### به‌روزرسانی از داخل برنامه
+
+در صفحهٔ **About & updates** گزینهٔ **Check for updates** را بزنید، فایل پیشنهادی را دانلود کنید و
+بعد **Install new update** را انتخاب کنید. در Windows فایل portable جایگزین و برنامه دوباره اجرا
+می‌شود؛ پوشهٔ فایل باید برای حساب کاربری شما قابل‌نوشتن باشد. در Linux برای بسته‌های DEB، RPM و Arch
+پنجرهٔ مجوز سیستم باز می‌شود؛ برای AppImage، فایل فعلی برنامه جایگزین می‌شود. نصب خودکار فعلاً برای
+نسخه‌های منتشرشدهٔ Windows و Linux فراهم است؛ برای سیستم‌های دیگر هنوز فایل انتشار نداریم.
 
 ## اجرای برنامه از سورس
 
