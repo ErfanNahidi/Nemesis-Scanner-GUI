@@ -18,10 +18,11 @@ LATEST_RELEASE_API = f"https://api.github.com/repos/{REPOSITORY}/releases/latest
 
 
 def version_tuple(value):
-    match = re.search(r"(\d+)\.(\d+)\.(\d+)", str(value))
+    match = re.search(r"(\d+)\.(\d+)(?:\.(\d+))?", str(value))
     if not match:
         raise ValueError(f"Unsupported version format: {value}")
-    return tuple(int(part) for part in match.groups())
+    major, minor, patch = match.groups()
+    return int(major), int(minor), int(patch or 0)
 
 
 def fetch_latest_release():

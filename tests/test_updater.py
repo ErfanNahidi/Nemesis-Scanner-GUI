@@ -9,6 +9,10 @@ from nemesis_gui.services import updater
 
 
 class UpdaterTests(unittest.TestCase):
+    def test_two_part_versions_match_patch_zero(self):
+        self.assertEqual(updater.version_tuple("1.3"), (1, 3, 0))
+        self.assertEqual(updater.version_tuple("v1.3.0"), (1, 3, 0))
+
     def test_installable_assets_are_limited_to_published_platforms(self):
         self.assertTrue(updater.is_installable_asset("NemesisScanner.exe", "Windows", frozen=True))
         self.assertTrue(updater.is_installable_asset("NemesisScanner-windows-x64.zip", "Windows", frozen=True))

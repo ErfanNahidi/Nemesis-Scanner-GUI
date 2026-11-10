@@ -1,6 +1,6 @@
 # Nemesis Scanner GUI — User Manual
 
-Version 1.3.0
+Version 1.3
 
 This manual covers installation, the four application screens, scan settings, vulnerability data,
 reports, data storage, and common problems. The interface is currently in English.
@@ -98,10 +98,10 @@ The page also displays release notes and credits the developer, **Erfan Nahidi**
 
 ### Debian or Ubuntu
 
-Open `nemesis-scanner-gui_1.3.0_all.deb` in the software installer, or run:
+Open `nemesis-scanner-gui_1.3_all.deb` in the software installer, or run:
 
 ```bash
-sudo apt install ./nemesis-scanner-gui_1.3.0_all.deb
+sudo apt install ./nemesis-scanner-gui_1.3_all.deb
 ```
 
 The package manager installs the declared dependencies. Start **Nemesis Scanner** from the
@@ -109,10 +109,10 @@ application menu or run `nemesis-scanner-gui`.
 
 ### Fedora-compatible Linux
 
-Open `nemesis-scanner-gui-1.3.0-1.x86_64.rpm` in Software, or run:
+Open `nemesis-scanner-gui-1.3-1.x86_64.rpm` in Software, or run:
 
 ```bash
-sudo dnf install ./nemesis-scanner-gui-1.3.0-1.x86_64.rpm
+sudo dnf install ./nemesis-scanner-gui-1.3-1.x86_64.rpm
 ```
 
 Start the application from the menu or run `nemesis-scanner-gui`.
@@ -122,7 +122,7 @@ Start the application from the menu or run `nemesis-scanner-gui`.
 Install the local package:
 
 ```bash
-sudo pacman -U ./nemesis-scanner-gui-1.3.0-1-any.pkg.tar.zst
+sudo pacman -U ./nemesis-scanner-gui-1.3-1-any.pkg.tar.zst
 ```
 
 Start it from the menu or run `nemesis-scanner-gui`. The release also includes `PKGBUILD` and a source
@@ -133,8 +133,8 @@ tarball for rebuilding with `makepkg`.
 Make the file executable, then launch it:
 
 ```bash
-chmod +x NemesisScanner-1.3.0-x86_64.AppImage
-./NemesisScanner-1.3.0-x86_64.AppImage
+chmod +x NemesisScanner-1.3-x86_64.AppImage
+./NemesisScanner-1.3-x86_64.AppImage
 ```
 
 Install Nmap separately. Depending on the Linux desktop, a compatible FUSE/AppImage runtime may

@@ -1,4 +1,4 @@
-# Nemesis Scanner GUI 1.3.0
+# Nemesis Scanner GUI 1.3
 
 ## What's changed
 
@@ -13,7 +13,7 @@
 
 Pushes and pull requests build platform artifacts and keep them as workflow artifacts for 14 days.
 To publish a release, set `nemesis_gui.__version__`, commit the changes, and push a matching tag,
-for example `v1.3.0`. GitHub creates the release only after both platform builds succeed.
+for example `v1.3`. GitHub creates the release only after both platform builds succeed.
 
 Windows automatic replacement requires the portable EXE to be in a folder writable by the current
 user. Linux package installs require desktop authorization; AppImage updates require a writable
