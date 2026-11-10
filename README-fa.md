@@ -4,7 +4,7 @@ Nemesis Scanner یک برنامهٔ دسکتاپ برای ارزیابی یک م
 و سرویس‌ها را شناسایی می‌کند، یافته‌ها را با داده‌های آسیب‌پذیری محلی یا آنلاین تطبیق می‌دهد و
 نتیجهٔ هر اسکن کامل‌شده را به‌شکل گزارش JSON ذخیره می‌کند.
 
-نسخهٔ رابط گرافیکی **1.3.0** است؛ شمارهٔ نسخهٔ GUI از موتور اسکن مستقل است.
+نسخهٔ رابط گرافیکی **1.3.1** است؛ شمارهٔ نسخهٔ GUI از موتور اسکن مستقل است.
 
 ## دریافت و نصب
 
@@ -14,10 +14,11 @@ Nemesis Scanner یک برنامهٔ دسکتاپ برای ارزیابی یک م
 | سیستم‌عامل | فایل | نصب یا اجرا |
 | --- | --- | --- |
 | Windows x64 | `NemesisScanner.exe` | فایل را دانلود و باز کنید. برای اسکن، Nmap ویندوز را جداگانه نصب کنید. |
-| Fedora-compatible Linux x86_64 | `nemesis-scanner-gui-1.3.0-1.x86_64.rpm` | با Software باز کنید یا `sudo dnf install ./nemesis-scanner-gui-1.3.0-1.x86_64.rpm` را اجرا کنید. |
-| Debian یا Ubuntu | `nemesis-scanner-gui_1.3.0_all.deb` | با نصب‌کنندهٔ بسته باز کنید یا `sudo apt install ./nemesis-scanner-gui_1.3.0_all.deb` را اجرا کنید. |
-| Arch Linux | `nemesis-scanner-gui-1.3.0-1-any.pkg.tar.zst` | `sudo pacman -U ./nemesis-scanner-gui-1.3.0-1-any.pkg.tar.zst` را اجرا کنید. |
-| Linux قابل‌حمل x86_64 | `NemesisScanner-1.3.0-x86_64.AppImage` | مجوز اجرا بدهید و فایل را باز کنید. Nmap باید روی سیستم نصب باشد. |
+| Windows قابل‌حمل | `NemesisScanner-1.3.1-windows-x64-portable.zip` | فایل را استخراج کنید و `NemesisScanner.exe` را اجرا کنید؛ نصب لازم نیست. |
+| Fedora-compatible Linux x86_64 | `nemesis-scanner-gui-1.3.1-1.x86_64.rpm` | با Software باز کنید یا `sudo dnf install ./nemesis-scanner-gui-1.3.1-1.x86_64.rpm` را اجرا کنید. |
+| Debian یا Ubuntu | `nemesis-scanner-gui_1.3.1_all.deb` | با نصب‌کنندهٔ بسته باز کنید یا `sudo apt install ./nemesis-scanner-gui_1.3.1_all.deb` را اجرا کنید. |
+| Arch Linux | `nemesis-scanner-gui-1.3.1-1-any.pkg.tar.zst` | `sudo pacman -U ./nemesis-scanner-gui-1.3.1-1-any.pkg.tar.zst` را اجرا کنید. |
+| Linux قابل‌حمل x86_64 | `NemesisScanner-1.3.1-x86_64.AppImage` | مجوز اجرا بدهید و فایل را باز کنید. Nmap باید روی سیستم نصب باشد. |
 
 بسته‌های DEB و Arch از Python و کتابخانه‌های همان توزیع استفاده می‌کنند؛ مدیر بسته وابستگی‌های
 اعلام‌شده را نصب می‌کند. فایل Windows، Python و کتابخانه‌های برنامه را در یک فایل همراه دارد و برای

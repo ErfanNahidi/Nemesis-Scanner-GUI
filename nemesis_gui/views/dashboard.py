@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from ..services.scanner import load_reports, summarize_report
-from ..theme import COLORS
+from ..theme import COLORS, FONT_FAMILY
 
 
 class DashboardPage(ttk.Frame):
@@ -21,9 +21,9 @@ class DashboardPage(ttk.Frame):
         hero = tk.Frame(self, bg=COLORS["green_dark"], padx=30, pady=28, highlightthickness=1, highlightbackground="#182D4C")
         hero.pack(fill="x", pady=(0, 20))
         hero.columnconfigure(0, weight=1)
-        tk.Label(hero, text="NETWORK SCANNER", bg=COLORS["green_dark"], fg=COLORS["lime"], font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, sticky="w")
-        tk.Label(hero, text="Check one host", bg=COLORS["green_dark"], fg="#FFFFFF", font=("DejaVu Sans", 20, "bold"), justify="left").grid(row=1, column=0, sticky="w", pady=(9, 6))
-        tk.Label(hero, text="View open ports, services, and optional security findings.", bg=COLORS["green_dark"], fg="#B7C7DC", font=("DejaVu Sans", 10)).grid(row=2, column=0, sticky="w")
+        tk.Label(hero, text="NETWORK SCANNER", bg=COLORS["green_dark"], fg=COLORS["lime"], font=(FONT_FAMILY, 8, "bold")).grid(row=0, column=0, sticky="w")
+        tk.Label(hero, text="Check one host", bg=COLORS["green_dark"], fg="#FFFFFF", font=(FONT_FAMILY, 20, "bold"), justify="left").grid(row=1, column=0, sticky="w", pady=(9, 6))
+        tk.Label(hero, text="View open ports, services, and optional security findings.", bg=COLORS["green_dark"], fg="#B7C7DC", font=(FONT_FAMILY, 10)).grid(row=2, column=0, sticky="w")
         ttk.Button(hero, text="Start a scan", style="Primary.TButton", command=lambda: self.app.show_page("scan")).grid(row=1, column=1, rowspan=2, padx=(25, 0), sticky="e")
 
         metrics = ttk.Frame(self)
@@ -42,8 +42,8 @@ class DashboardPage(ttk.Frame):
             marker.pack(side="left", fill="y", padx=(0, 15))
             value_block = tk.Frame(card, bg=COLORS["panel"])
             value_block.pack(side="left", fill="both", expand=True)
-            tk.Label(value_block, text=title, bg=COLORS["panel"], fg=COLORS["muted"], font=("DejaVu Sans", 8, "bold")).pack(anchor="w")
-            value = tk.Label(value_block, text="0", bg=COLORS["panel"], fg=COLORS["ink"], font=("DejaVu Sans", 25, "bold"))
+            tk.Label(value_block, text=title, bg=COLORS["panel"], fg=COLORS["muted"], font=(FONT_FAMILY, 8, "bold")).pack(anchor="w")
+            value = tk.Label(value_block, text="0", bg=COLORS["panel"], fg=COLORS["ink"], font=(FONT_FAMILY, 25, "bold"))
             value.pack(anchor="w", pady=(6, 0))
             self.metric_values[key] = value
 
@@ -55,7 +55,7 @@ class DashboardPage(ttk.Frame):
         recent_box.grid(row=0, column=0, sticky="nsew", padx=(0, 9))
         history_box = ttk.Frame(lower, style="Panel.TFrame", padding=20)
         history_box.grid(row=0, column=1, sticky="nsew", padx=(9, 0))
-        ttk.Label(recent_box, text="Recent scan reports", style="Panel.TLabel", font=("DejaVu Sans", 12, "bold")).pack(anchor="w")
+        ttk.Label(recent_box, text="Recent scan reports", style="Panel.TLabel", font=(FONT_FAMILY, 12, "bold")).pack(anchor="w")
         ttk.Label(recent_box, text="Most recently generated reports", style="Muted.TLabel").pack(anchor="w", pady=(4, 13))
         self.recent_tree = ttk.Treeview(recent_box, columns=("target", "services", "date"), show="headings", height=5)
         for column, title, width in (("target", "TARGET", 180), ("services", "SERVICES", 85), ("date", "DATE", 145)):
@@ -64,9 +64,9 @@ class DashboardPage(ttk.Frame):
         self.recent_tree.pack(fill="both", expand=True)
         self.recent_tree.bind("<Double-1>", lambda _event: self.app.show_page("reports"))
 
-        ttk.Label(history_box, text="Recent targets", style="Panel.TLabel", font=("DejaVu Sans", 12, "bold")).pack(anchor="w")
+        ttk.Label(history_box, text="Recent targets", style="Panel.TLabel", font=(FONT_FAMILY, 12, "bold")).pack(anchor="w")
         ttk.Label(history_box, text="Previously scanned hosts", style="Muted.TLabel").pack(anchor="w", pady=(4, 13))
-        self.target_list = tk.Listbox(history_box, height=5, bg=COLORS["soft"], fg=COLORS["ink"], selectbackground=COLORS["mint"], selectforeground=COLORS["ink"], relief="flat", highlightthickness=0, font=("DejaVu Sans", 10), activestyle="none")
+        self.target_list = tk.Listbox(history_box, height=5, bg=COLORS["soft"], fg=COLORS["ink"], selectbackground=COLORS["mint"], selectforeground=COLORS["ink"], relief="flat", highlightthickness=0, font=(FONT_FAMILY, 10), activestyle="none")
         self.target_list.pack(fill="both", expand=True)
         self.target_list.bind("<Double-1>", self._use_recent_target)
 

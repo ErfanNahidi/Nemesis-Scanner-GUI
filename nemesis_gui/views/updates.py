@@ -16,7 +16,7 @@ from ..services.updater import (
     reveal_in_file_manager,
     version_tuple,
 )
-from ..theme import COLORS
+from ..theme import COLORS, FONT_FAMILY
 
 
 class UpdatesPage(ttk.Frame):
@@ -51,14 +51,14 @@ class UpdatesPage(ttk.Frame):
             text="DEVELOPED BY",
             bg=COLORS["green_dark"],
             fg=COLORS["lime"],
-            font=("DejaVu Sans", 8, "bold"),
+            font=(FONT_FAMILY, 8, "bold"),
         ).pack(anchor="w")
         tk.Label(
             credit,
             text="Erfan Nahidi",
             bg=COLORS["green_dark"],
             fg="#FFFFFF",
-            font=("DejaVu Sans", 16, "bold"),
+            font=(FONT_FAMILY, 16, "bold"),
         ).pack(anchor="w", pady=(2, 0))
         github_link = tk.Label(
             credit,
@@ -66,7 +66,7 @@ class UpdatesPage(ttk.Frame):
             bg=COLORS["green_dark"],
             fg=COLORS["lime"],
             cursor="hand2",
-            font=("DejaVu Sans", 10, "underline"),
+            font=(FONT_FAMILY, 10, "underline"),
         )
         github_link.pack(anchor="w", pady=(4, 0))
         github_link.bind("<Button-1>", lambda _event: webbrowser.open("https://github.com/ErfanNahidi"))
@@ -74,8 +74,8 @@ class UpdatesPage(ttk.Frame):
         version_card = ttk.Frame(self, style="Panel.TFrame", padding=20)
         version_card.pack(fill="x", pady=(0, 14))
         version_card.columnconfigure(1, weight=1)
-        ttk.Label(version_card, text="INSTALLED VERSION", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, sticky="w")
-        ttk.Label(version_card, text=__version__, style="Panel.TLabel", font=("DejaVu Sans", 18, "bold")).grid(row=1, column=0, sticky="w", pady=(3, 0))
+        ttk.Label(version_card, text="INSTALLED VERSION", style="Muted.TLabel", font=(FONT_FAMILY, 8, "bold")).grid(row=0, column=0, sticky="w")
+        ttk.Label(version_card, text=__version__, style="Panel.TLabel", font=(FONT_FAMILY, 18, "bold")).grid(row=1, column=0, sticky="w", pady=(3, 0))
         self.latest_label = ttk.Label(version_card, text="Latest version: not checked", style="Muted.TLabel")
         self.latest_label.grid(row=1, column=1, sticky="e", padx=(20, 0))
 
@@ -85,7 +85,7 @@ class UpdatesPage(ttk.Frame):
         controls = ttk.Frame(self, style="Panel.TFrame", padding=18)
         controls.pack(fill="x", pady=(0, 14))
         controls.columnconfigure(0, weight=1)
-        ttk.Label(controls, text="Update file for this system", style="Panel.TLabel", font=("DejaVu Sans", 10, "bold")).grid(row=0, column=0, sticky="w")
+        ttk.Label(controls, text="Update file for this system", style="Panel.TLabel", font=(FONT_FAMILY, 10, "bold")).grid(row=0, column=0, sticky="w")
         self.asset_box = ttk.Combobox(controls, state="readonly", values=())
         self.asset_box.grid(row=1, column=0, sticky="ew", pady=(9, 12))
         self.asset_box.bind("<<ComboboxSelected>>", self._asset_selected)
@@ -110,7 +110,7 @@ class UpdatesPage(ttk.Frame):
 
         notes = ttk.Frame(self, style="Panel.TFrame", padding=18)
         notes.pack(fill="both", expand=True, pady=(0, 14))
-        ttk.Label(notes, text="RELEASE NOTES", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).pack(anchor="w")
+        ttk.Label(notes, text="RELEASE NOTES", style="Muted.TLabel", font=(FONT_FAMILY, 8, "bold")).pack(anchor="w")
         self.notes_label = ttk.Label(notes, text="Release information will appear here after checking for updates.", style="Muted.TLabel", wraplength=700, justify="left")
         self.notes_label.pack(fill="both", expand=True, anchor="nw", pady=(9, 0))
 

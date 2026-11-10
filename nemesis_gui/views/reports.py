@@ -7,7 +7,7 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
 from ..services.scanner import load_reports, summarize_report
-from ..theme import COLORS
+from ..theme import COLORS, FONT_FAMILY
 
 
 class ReportsPage(ttk.Frame):
@@ -30,7 +30,7 @@ class ReportsPage(ttk.Frame):
         list_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
         detail_panel = ttk.Frame(body, style="Panel.TFrame", padding=17)
         detail_panel.grid(row=0, column=1, sticky="nsew", padx=(8, 0))
-        ttk.Label(list_panel, text="REPORT ARCHIVE", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).pack(anchor="w", pady=(0, 10))
+        ttk.Label(list_panel, text="REPORT ARCHIVE", style="Muted.TLabel", font=(FONT_FAMILY, 8, "bold")).pack(anchor="w", pady=(0, 10))
         self.tree = ttk.Treeview(list_panel, columns=("target", "date"), show="headings", height=14)
         self.tree.heading("target", text="TARGET")
         self.tree.heading("date", text="DATE")
@@ -42,11 +42,11 @@ class ReportsPage(ttk.Frame):
 
         detail_panel.columnconfigure(0, weight=1)
         detail_panel.rowconfigure(2, weight=1)
-        self.detail_title = ttk.Label(detail_panel, text="Select a report", style="Panel.TLabel", font=("DejaVu Sans", 14, "bold"))
+        self.detail_title = ttk.Label(detail_panel, text="Select a report", style="Panel.TLabel", font=(FONT_FAMILY, 14, "bold"))
         self.detail_title.grid(row=0, column=0, sticky="w")
         self.detail_subtitle = ttk.Label(detail_panel, text="Report metadata and findings are displayed here.", style="Muted.TLabel")
         self.detail_subtitle.grid(row=1, column=0, sticky="w", pady=(5, 12))
-        self.detail_text = tk.Text(detail_panel, wrap="word", bg=COLORS["soft"], fg=COLORS["ink"], relief="flat", padx=12, pady=12, font=("DejaVu Sans", 9), state="disabled")
+        self.detail_text = tk.Text(detail_panel, wrap="word", bg=COLORS["soft"], fg=COLORS["ink"], relief="flat", padx=12, pady=12, font=(FONT_FAMILY, 9), state="disabled")
         self.detail_text.grid(row=2, column=0, sticky="nsew")
         self.selected_path = None
         self.refresh()

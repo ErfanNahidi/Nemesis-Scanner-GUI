@@ -46,13 +46,31 @@ jobs:
         shell: pwsh
         run: ./build-windows.ps1
 
+      - name: Smoke test the packaged Windows app
+        shell: pwsh
+        run: |
+          $executable = (Resolve-Path 'dist/windows/NemesisScanner.exe').Path
+          $process = Start-Process -FilePath $executable -PassThru
+          try {
+            $deadline = (Get-Date).AddSeconds(30)
+            do {
+              Start-Sleep -Seconds 1
+              $process.Refresh()
+              if ($process.HasExited) {
+                throw "NemesisScanner.exe exited during startup with code $($process.ExitCode)."
+              }
+            } while ((Get-Date) -lt $deadline)
+          } finally {
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+          }
+
       - name: Upload Windows build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: release-windows
           path: |
             dist/windows/NemesisScanner.exe
-            dist/windows/NemesisScanner-*-windows-x64.zip
+            dist/windows/NemesisScanner-*-windows-x64-portable.zip
           if-no-files-found: error
           retention-days: 14
 

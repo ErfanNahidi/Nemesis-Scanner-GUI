@@ -1,3 +1,4 @@
+import ctypes
 import platform
 import shutil
 import tkinter as tk
@@ -7,20 +8,40 @@ from tkinter import ttk
 from core.history import RecentTargetStore
 
 from . import __version__
-from .theme import COLORS, apply_theme
+from .theme import COLORS, FONT_FAMILY, apply_theme
 from .views.dashboard import DashboardPage
 from .views.reports import ReportsPage
 from .views.scan import ScanPage
 from .views.updates import UpdatesPage
 
 
+def _enable_windows_dpi_awareness():
+    if platform.system() != "Windows":
+        return
+    try:
+        if ctypes.windll.user32.SetProcessDpiAwarenessContext(ctypes.c_void_p(-4)):
+            return
+    except (AttributeError, OSError):
+        pass
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)
+    except (AttributeError, OSError):
+        try:
+            ctypes.windll.user32.SetProcessDPIAware()
+        except (AttributeError, OSError):
+            pass
+
+
 class NemesisApp(tk.Tk):
     def __init__(self):
+        _enable_windows_dpi_awareness()
         if platform.system() == "Linux":
             # Tk 9 no longer exposes `wm class`; set X11's resource/class names at creation.
             super().__init__(baseName="nemesis-scanner", className="NemesisScanner")
         else:
             super().__init__()
+        if platform.system() == "Windows":
+            self.tk.call("tk", "scaling", self.winfo_fpixels("1i") / 72.0)
         apply_theme(self)
         self.title(f"Nemesis Scanner GUI {__version__}")
         self.window_icon = None
@@ -72,13 +93,13 @@ class NemesisApp(tk.Tk):
                 raise FileNotFoundError(f"Nemesis logo was not found in {gui_root}")
         except (OSError, tk.TclError, ValueError) as error:
             print(f"Could not load logo {logo_path}: {error}")
-            tk.Label(brand, text="Logo unavailable", bg=COLORS["green_dark"], fg="#F1A78C", font=("DejaVu Sans", 8)).pack(side="left", padx=(0, 12))
+            tk.Label(brand, text="Logo unavailable", bg=COLORS["green_dark"], fg="#F1A78C", font=(FONT_FAMILY, 8)).pack(side="left", padx=(0, 12))
         brand_copy = tk.Frame(brand, bg=COLORS["green_dark"])
         brand_copy.pack(side="left", anchor="center")
-        tk.Label(brand_copy, text="NEMESIS", bg=COLORS["green_dark"], fg="#FFFFFF", font=("DejaVu Sans", 13, "bold")).pack(anchor="w")
-        tk.Label(brand_copy, text=f"SCANNER  /  GUI {__version__}", bg=COLORS["green_dark"], fg="#A5B6CE", font=("DejaVu Sans", 7, "bold")).pack(anchor="w", pady=(3, 0))
+        tk.Label(brand_copy, text="NEMESIS", bg=COLORS["green_dark"], fg="#FFFFFF", font=(FONT_FAMILY, 13, "bold")).pack(anchor="w")
+        tk.Label(brand_copy, text=f"SCANNER  /  GUI {__version__}", bg=COLORS["green_dark"], fg="#A5B6CE", font=(FONT_FAMILY, 7, "bold")).pack(anchor="w", pady=(3, 0))
 
-        tk.Label(sidebar, text="MENU", bg=COLORS["green_dark"], fg="#8798B1", font=("DejaVu Sans", 8, "bold")).pack(anchor="w", pady=(0, 10))
+        tk.Label(sidebar, text="MENU", bg=COLORS["green_dark"], fg="#8798B1", font=(FONT_FAMILY, 8, "bold")).pack(anchor="w", pady=(0, 10))
         self.nav_buttons = {}
         self.nav_rows = {}
         for key, label in (
@@ -102,7 +123,7 @@ class NemesisApp(tk.Tk):
                 relief="flat",
                 padx=13,
                 pady=13,
-                font=("DejaVu Sans", 10, "bold"),
+                font=(FONT_FAMILY, 10, "bold"),
                 command=lambda page=key: self.show_page(page),
             )
             button.pack(side="left", fill="x", expand=True)
@@ -114,17 +135,17 @@ class NemesisApp(tk.Tk):
         tk.Frame(sidebar, bg="#243650", height=1).pack(fill="x", pady=(8, 15))
         nmap_state = "Nmap ready" if shutil.which("nmap") else "Nmap not found"
         state_color = COLORS["lime"] if shutil.which("nmap") else "#F1A78C"
-        tk.Label(sidebar, text="SCANNER STATUS", bg=COLORS["green_dark"], fg="#8798B1", font=("DejaVu Sans", 8, "bold")).pack(anchor="w")
-        tk.Label(sidebar, text=f"●  {nmap_state}", bg=COLORS["green_dark"], fg=state_color, font=("DejaVu Sans", 9)).pack(anchor="w", pady=(7, 0))
+        tk.Label(sidebar, text="SCANNER STATUS", bg=COLORS["green_dark"], fg="#8798B1", font=(FONT_FAMILY, 8, "bold")).pack(anchor="w")
+        tk.Label(sidebar, text=f"●  {nmap_state}", bg=COLORS["green_dark"], fg=state_color, font=(FONT_FAMILY, 9)).pack(anchor="w", pady=(7, 0))
 
         main = tk.Frame(shell, bg=COLORS["canvas"])
         main.pack(side="left", fill="both", expand=True)
         topbar = tk.Frame(main, bg=COLORS["panel"], height=66, padx=34, highlightthickness=1, highlightbackground=COLORS["line"])
         topbar.pack(fill="x")
         topbar.pack_propagate(False)
-        self.page_title = tk.Label(topbar, text="Dashboard", bg=COLORS["panel"], fg=COLORS["ink"], font=("DejaVu Sans", 10, "bold"))
+        self.page_title = tk.Label(topbar, text="Dashboard", bg=COLORS["panel"], fg=COLORS["ink"], font=(FONT_FAMILY, 10, "bold"))
         self.page_title.pack(side="left", anchor="center")
-        self.status_bar = tk.Label(main, text="Idle", bg=COLORS["canvas"], fg=COLORS["muted"], anchor="w", padx=34, pady=10, font=("DejaVu Sans", 8))
+        self.status_bar = tk.Label(main, text="Idle", bg=COLORS["canvas"], fg=COLORS["muted"], anchor="w", padx=34, pady=10, font=(FONT_FAMILY, 8))
         self.status_bar.pack(side="bottom", fill="x")
         self.content = ttk.Frame(main, padding=(24, 16, 24, 8))
         self.content.pack(fill="both", expand=True)

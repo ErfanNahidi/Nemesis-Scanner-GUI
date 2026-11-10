@@ -49,7 +49,7 @@ def recommended_asset_name(assets):
     names = {asset["name"] for asset in assets}
     system = platform.system()
     if system == "Windows":
-        preferred = ("NemesisScanner.exe", "windows-x64.zip")
+        preferred = ("NemesisScanner.exe", "windows-x64-portable.zip", "windows-x64.zip")
     elif system == "Linux":
         try:
             distro = platform.freedesktop_os_release().get("ID", "").lower()
@@ -122,7 +122,7 @@ def is_installable_asset(asset_name, system=None, frozen=None):
     name = str(asset_name).lower()
     if system == "Windows":
         is_frozen = getattr(sys, "frozen", False) if frozen is None else frozen
-        return is_frozen and name.endswith((".exe", "windows-x64.zip"))
+        return is_frozen and name.endswith((".exe", "windows-x64-portable.zip", "windows-x64.zip"))
     if system == "Linux":
         return name.endswith((".appimage", ".deb", ".rpm", ".pkg.tar.zst"))
     return False

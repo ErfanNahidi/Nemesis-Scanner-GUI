@@ -5,7 +5,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from ..services.scanner import ScanWorker, flatten_findings, summarize_report, validate_target
-from ..theme import COLORS
+from ..theme import COLORS, FONT_FAMILY
 
 
 class ScanPage(ttk.Frame):
@@ -53,7 +53,7 @@ class ScanPage(ttk.Frame):
         form.grid(row=1, column=0, sticky="ew", pady=(0, 7))
         form.columnconfigure(0, weight=3)
         form.columnconfigure(1, weight=2)
-        ttk.Label(form, text="HOST OR IP ADDRESS", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, columnspan=2, sticky="w")
+        ttk.Label(form, text="HOST OR IP ADDRESS", style="Muted.TLabel", font=(FONT_FAMILY, 8, "bold")).grid(row=0, column=0, columnspan=2, sticky="w")
         self.target_entry = ttk.Entry(form, textvariable=self.target_var)
         self.target_entry.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(5, 8))
         self.target_entry.bind("<Return>", lambda _event: self._start_scan())
@@ -62,7 +62,7 @@ class ScanPage(ttk.Frame):
         self.workflow_tabs.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 8))
         network_tab = ttk.Frame(self.workflow_tabs, style="Panel.TFrame", padding=(8, 8, 8, 5))
         network_tab.columnconfigure(0, weight=1)
-        ttk.Label(network_tab, text="SCAN COVERAGE", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, sticky="w")
+        ttk.Label(network_tab, text="SCAN COVERAGE", style="Muted.TLabel", font=(FONT_FAMILY, 8, "bold")).grid(row=0, column=0, sticky="w")
         self.profile_combo = ttk.Combobox(network_tab, textvariable=self.profile_var, values=("Quick", "Standard", "All TCP ports"), state="readonly", width=22)
         self.profile_combo.grid(row=1, column=0, sticky="ew", pady=(5, 4))
         ttk.Label(network_tab, textvariable=self.profile_hint, style="Muted.TLabel").grid(row=2, column=0, sticky="w")
@@ -70,7 +70,7 @@ class ScanPage(ttk.Frame):
 
         vulnerability_tab = ttk.Frame(self.workflow_tabs, style="Panel.TFrame", padding=(8, 8, 8, 5))
         vulnerability_tab.columnconfigure(0, weight=1)
-        ttk.Label(vulnerability_tab, text="ASSESSMENT TYPE", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, sticky="w")
+        ttk.Label(vulnerability_tab, text="ASSESSMENT TYPE", style="Muted.TLabel", font=(FONT_FAMILY, 8, "bold")).grid(row=0, column=0, sticky="w")
         self.assessment_preset_combo = ttk.Combobox(
             vulnerability_tab,
             textvariable=self.assessment_preset_var,
@@ -80,7 +80,7 @@ class ScanPage(ttk.Frame):
         )
         self.assessment_preset_combo.grid(row=1, column=0, sticky="ew", pady=(5, 4))
         ttk.Label(vulnerability_tab, textvariable=self.assessment_preset_hint, style="Muted.TLabel").grid(row=2, column=0, sticky="w")
-        ttk.Label(vulnerability_tab, text="VULNERABILITY DATA", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=3, column=0, sticky="w", pady=(8, 0))
+        ttk.Label(vulnerability_tab, text="VULNERABILITY DATA", style="Muted.TLabel", font=(FONT_FAMILY, 8, "bold")).grid(row=3, column=0, sticky="w", pady=(8, 0))
         self.source_combo = ttk.Combobox(
             vulnerability_tab,
             textvariable=self.source_var,
@@ -93,8 +93,8 @@ class ScanPage(ttk.Frame):
         self.api_keys.grid(row=5, column=0, sticky="ew", pady=(8, 0))
         self.api_keys.columnconfigure(0, weight=1)
         self.api_keys.columnconfigure(1, weight=1)
-        ttk.Label(self.api_keys, text="NVD key (optional)", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, sticky="w")
-        ttk.Label(self.api_keys, text="Vulners key (required for Vulners)", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=1, sticky="w", padx=(14, 0))
+        ttk.Label(self.api_keys, text="NVD key (optional)", style="Muted.TLabel", font=(FONT_FAMILY, 8, "bold")).grid(row=0, column=0, sticky="w")
+        ttk.Label(self.api_keys, text="Vulners key (required for Vulners)", style="Muted.TLabel", font=(FONT_FAMILY, 8, "bold")).grid(row=0, column=1, sticky="w", padx=(14, 0))
         self.nvd_key_entry = ttk.Entry(self.api_keys, textvariable=self.nvd_key_var, show="•")
         self.nvd_key_entry.grid(row=1, column=0, sticky="ew", pady=(6, 0))
         self.vulners_key_entry = ttk.Entry(self.api_keys, textvariable=self.vulners_key_var, show="•")
@@ -112,7 +112,7 @@ class ScanPage(ttk.Frame):
         self.options = options
         options.grid(row=4, column=0, columnspan=2, sticky="ew")
         options.columnconfigure(0, weight=1)
-        ttk.Label(options, text="ADDITIONAL CHECKS", style="Muted.TLabel", font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, sticky="w", pady=(0, 3))
+        ttk.Label(options, text="ADDITIONAL CHECKS", style="Muted.TLabel", font=(FONT_FAMILY, 8, "bold")).grid(row=0, column=0, sticky="w", pady=(0, 3))
         ttk.Checkbutton(options, text="Run extra vulnerability checks", variable=self.vuln_var).grid(row=1, column=0, sticky="w", pady=4)
         ttk.Checkbutton(options, text="Check discovered services for common issues", variable=self.deep_var).grid(row=2, column=0, sticky="w", pady=4)
         self.elevate_check = ttk.Checkbutton(
@@ -127,7 +127,7 @@ class ScanPage(ttk.Frame):
 
         consent = tk.Frame(form, bg=COLORS["soft"], padx=8, pady=5)
         consent.grid(row=5, column=0, columnspan=2, sticky="ew", pady=(5, 5))
-        tk.Checkbutton(consent, text="I have permission to scan this host.", variable=self.authorized_var, bg=COLORS["soft"], activebackground=COLORS["soft"], fg=COLORS["ink"], selectcolor=COLORS["mint"], font=("DejaVu Sans", 9, "bold"), command=self._update_button).pack(anchor="w")
+        tk.Checkbutton(consent, text="I have permission to scan this host.", variable=self.authorized_var, bg=COLORS["soft"], activebackground=COLORS["soft"], fg=COLORS["ink"], selectcolor=COLORS["mint"], font=(FONT_FAMILY, 9, "bold"), command=self._update_button).pack(anchor="w")
 
         footer = ttk.Frame(form, style="Panel.TFrame")
         footer.grid(row=6, column=0, columnspan=2, sticky="ew")
@@ -148,7 +148,7 @@ class ScanPage(ttk.Frame):
         title_row = ttk.Frame(result, style="Panel.TFrame")
         title_row.grid(row=0, column=0, sticky="ew")
         title_row.columnconfigure(0, weight=1)
-        ttk.Label(title_row, text="Scan results", style="Panel.TLabel", font=("DejaVu Sans", 12, "bold")).grid(row=0, column=0, sticky="w")
+        ttk.Label(title_row, text="Scan results", style="Panel.TLabel", font=(FONT_FAMILY, 12, "bold")).grid(row=0, column=0, sticky="w")
         self.elapsed_label = ttk.Label(title_row, text="", style="Muted.TLabel")
         self.elapsed_label.grid(row=0, column=1, sticky="e", padx=(12, 0))
         self.result_summary = ttk.Label(title_row, text="No scan results", style="Muted.TLabel")

@@ -17,6 +17,7 @@ class UpdaterTests(unittest.TestCase):
         self.assertTrue(updater.is_installable_asset("NemesisScanner.exe", "Windows", frozen=True))
         self.assertTrue(updater.is_installable_asset("NemesisScanner-windows-x64.zip", "Windows", frozen=True))
         self.assertFalse(updater.is_installable_asset("NemesisScanner.exe", "Windows", frozen=False))
+        self.assertTrue(updater.is_installable_asset("NemesisScanner-windows-x64-portable.zip", "Windows", frozen=True))
         self.assertTrue(updater.is_installable_asset("nemesis-scanner.deb", "Linux"))
         self.assertTrue(updater.is_installable_asset("NemesisScanner.AppImage", "Linux"))
         self.assertFalse(updater.is_installable_asset("NemesisScanner.exe", "Linux"))
